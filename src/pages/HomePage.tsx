@@ -1,0 +1,463 @@
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ScrollReveal";
+import heroBg from "@/assets/hero-bg.jpg";
+import { useQuery } from "@tanstack/react-query";
+import { collection, getDocs, query as fsQuery, limit, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  BookOpen, Users, Trophy, Target, Star, ChevronRight, ChevronLeft,
+  GraduationCap, Clock, Shield, TrendingUp, Phone, Mail, MapPin
+} from "lucide-react";
+
+const stats = [
+  { value: "2,500+", label: "Students Coached" },
+  { value: "92%", label: "Selection Rate" },
+  { value: "15+", label: "Expert Faculty" },
+  { value: "8", label: "Years of Excellence" },
+];
+
+const courses = [
+  { title: "Classes 5–10", desc: "Strong academic foundation with concept-driven teaching", icon: BookOpen, color: "from-blue-500/20 to-blue-600/5" },
+  { title: "Classes 11–12", desc: "Board exam mastery with competitive edge preparation", icon: GraduationCap, color: "from-emerald-500/20 to-emerald-600/5" },
+  { title: "NDA Coaching", desc: "Comprehensive NDA & CDS exam preparation program", icon: Shield, color: "from-amber-500/20 to-amber-600/5" },
+  { title: "CUET Preparation", desc: "Targeted coaching for university entrance success", icon: Target, color: "from-rose-500/20 to-rose-600/5" },
+];
+
+const features = [
+  { icon: Users, title: "Small Batch Sizes", desc: "Maximum 25 students per batch for personalized attention" },
+  { icon: Trophy, title: "Proven Track Record", desc: "Consistently high selection rates across competitive exams" },
+  { icon: Clock, title: "Flexible Timings", desc: "Morning, afternoon, and evening batches to suit every schedule" },
+  { icon: TrendingUp, title: "Regular Assessments", desc: "Weekly tests and detailed performance analytics for growth" },
+  { icon: BookOpen, title: "Study Material", desc: "Comprehensive course material designed by experienced faculty" },
+  { icon: Target, title: "Doubt Sessions", desc: "Dedicated doubt-clearing sessions every week" },
+];
+
+const testimonials = [
+  { name: "Arjun Mehta", role: "NDA Selected, 2024", text: "Wave Academy's structured approach and mock tests were instrumental in my NDA selection. The faculty truly cares about each student's success.", rating: 5 },
+  { name: "Priya Sharma", role: "CUET Topper, 2024", text: "The CUET preparation here was outstanding. From strategy sessions to daily practice, everything was perfectly organized.", rating: 5 },
+  { name: "Rahul Verma", role: "Class 12, Board Topper", text: "I scored 96% in my boards thanks to Wave Academy. The teachers made even the toughest concepts feel simple.", rating: 5 },
+];
+
+export default function HomePage() {
+  const [currentBanner, setCurrentBanner] = useState(0);
+
+  const { data: banners } = useQuery({
+    queryKey: ["site-banners"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("site_banners").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (!banners || banners.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [banners]);
+
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: async () => {
+      const q = fsQuery(collection(db, "site_settings"), limit(1));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.empty ? null : querySnapshot.docs[0].data();
+    },
+  });
+
+  const { data: dynamicTestimonials } = useQuery({
+    queryKey: ["testimonials"],
+    queryFn: async () => {
+      // Fetch all and filter client-side to avoid requiring Firestore composite index
+      const q = fsQuery(collection(db, "testimonials"), orderBy("created_at", "desc"));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() as any }))
+        .filter(t => t.is_active !== false); // show all unless explicitly hidden
+    },
+  });
+
+  const { data: facultyList } = useQuery({
+    queryKey: ["faculty"],
+    queryFn: async () => {
+      const q = fsQuery(collection(db, "faculty"), orderBy("order", "asc"));
+      const snap = await getDocs(q);
+      return snap.docs
+        .map(d => ({ id: d.id, ...d.data() as any }))
+        .filter(f => f.is_active !== false);
+    },
+  });
+
+  const displayTestimonials = dynamicTestimonials && dynamicTestimonials.length > 0 ? dynamicTestimonials : testimonials;
+
+  return (
+    <div className="overflow-hidden">
+      {settings?.announcement_active && settings?.announcement_text && (
+        <div className="bg-gold text-navy text-center py-3 px-4 text-sm font-semibold animate-fade-in relative z-50">
+          {settings.announcement_text}
+        </div>
+      )}
+      {/* Hero */}
+      <section className="relative min-h-[90vh] flex items-center bg-navy overflow-hidden">
+        {banners && banners.length > 0 ? (
+          banners.map((banner, idx) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                idx === currentBanner ? "opacity-100 z-0" : "opacity-0 -z-10"
+              }`}
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-40"
+                style={{ backgroundImage: `url(${banner.image_url})` }}
+              />
+            </div>
+          ))
+        ) : (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{ backgroundImage: `url(${heroBg})` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/60 z-0" />
+
+        <div className="container mx-auto px-4 relative z-10 py-32">
+          <div className="max-w-3xl min-h-[250px] relative">
+            {banners && banners.length > 0 ? (
+              banners.map((banner, idx) => (
+                <div
+                  key={`text-${banner.id}`}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                    idx === currentBanner
+                      ? "opacity-100 translate-x-0 pointer-events-auto"
+                      : "opacity-0 translate-x-8 -z-10 pointer-events-none"
+                  }`}
+                >
+                  {banner.title && (
+                    <h1 className="text-gold-light leading-[1.1] text-balance mb-6">
+                      {banner.title}
+                    </h1>
+                  )}
+                  {banner.description && (
+                    <p className="text-lg text-gold-muted max-w-lg leading-relaxed text-pretty mb-8 line-clamp-4">
+                      {banner.description}
+                    </p>
+                  )}
+                  {banner.link && (
+                    <div className="flex gap-4">
+                      <Link to={banner.link}>
+                        <Button variant="hero" size="xl">
+                          Learn More <ChevronRight className="h-5 w-5 ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div
+                className="opacity-0 animate-fade-up pointer-events-auto"
+                style={{ animationDelay: "400ms", animationFillMode: "forwards" }}
+              >
+                <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/10 text-gold text-sm font-medium mb-6">
+                  Classes 5–12 · NDA · CUET · Sainik School
+                </div>
+                <h1 className="text-gold-light leading-[1.1] text-balance">
+                  Ride the Wave <br />to Academic <span className="text-gold">Excellence</span>
+                </h1>
+                <p className="mt-6 text-lg text-gold-muted max-w-lg leading-relaxed text-pretty">
+                  Expert-led coaching with personalized attention, rigorous test series, 
+                  and a proven track record of turning aspirations into achievements.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-4">
+                  <Link to="/enroll">
+                    <Button variant="hero" size="xl">
+                      Enroll Now <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link to="/courses">
+                    <Button variant="hero-outline" size="xl">
+                      Explore Courses
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Banner Controls */}
+          {banners && banners.length > 1 && (
+            <div className="flex items-center gap-4 mt-8 lg:mt-12 z-20 relative">
+              <button
+                onClick={() => setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length)}
+                className="w-10 h-10 rounded-full bg-navy border border-gold/20 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors pointer-events-auto"
+                aria-label="Previous banner"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setCurrentBanner((prev) => (prev + 1) % banners.length)}
+                className="w-10 h-10 rounded-full bg-navy border border-gold/20 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors pointer-events-auto"
+                aria-label="Next banner"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <div className="flex items-center gap-2 ml-4">
+                {banners.map((_, idx) => (
+                  <button
+                    key={`dot-${idx}`}
+                    onClick={() => setCurrentBanner(idx)}
+                    className={`h-2 rounded-full transition-all pointer-events-auto ${
+                      idx === currentBanner ? "w-8 bg-gold" : "w-2 bg-gold/30"
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Stats bar */}
+          <div
+            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl opacity-0 animate-fade-up"
+            style={{ animationDelay: "1000ms", animationFillMode: "forwards" }}
+          >
+            {stats.map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="text-3xl font-bold text-gold font-display">{s.value}</div>
+                <div className="text-sm text-gold-muted mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <ScrollReveal direction="left">
+              <div className="space-y-6">
+                <span className="text-gold font-semibold text-sm uppercase tracking-widest">About Us</span>
+                <h2 className="text-foreground text-balance">
+                  Building Futures Since 2017
+                </h2>
+                <p className="text-muted-foreground leading-relaxed text-pretty">
+                  Wave Academy was founded with a singular mission — to provide world-class coaching 
+                  to students in smaller cities. Over 8 years, we've guided thousands of students 
+                  through board exams, NDA selections, CUET admissions, and Sainik School entrances.
+                </p>
+                <p className="text-muted-foreground leading-relaxed text-pretty">
+                  Our faculty comprises experienced educators from premier institutions who bring 
+                  both expertise and genuine care to the classroom. We believe every student 
+                  deserves the chance to excel.
+                </p>
+                <Link to="/contact">
+                  <Button variant="gold" size="lg" className="mt-2">
+                    Get in Touch
+                  </Button>
+                </Link>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal direction="right" delay={200}>
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((s, i) => (
+                  <div
+                    key={s.label}
+                    className={`p-6 rounded-xl bg-navy text-center ${
+                      i === 0 ? "col-span-2 md:col-span-1" : ""
+                    }`}
+                  >
+                    <div className="text-3xl font-bold text-gold font-display">{s.value}</div>
+                    <div className="text-sm text-gold-muted mt-2">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Courses Preview */}
+      <section className="py-24 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="text-gold font-semibold text-sm uppercase tracking-widest">Our Programs</span>
+              <h2 className="mt-3 text-foreground text-balance">
+                Comprehensive Coaching Programs
+              </h2>
+              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-pretty">
+                From academic excellence to competitive exam success, our programs are 
+                designed to bring out the best in every student.
+              </p>
+            </div>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {courses.map((c, i) => (
+              <ScrollReveal key={c.title} delay={i * 100}>
+                <Link to="/courses" className="group block">
+                  <div className={`h-full p-6 rounded-xl bg-gradient-to-br ${c.color} border border-border/50 hover:shadow-lg transition-shadow duration-300`}>
+                    <c.icon className="h-10 w-10 text-gold mb-4" />
+                    <h3 className="text-lg text-foreground">{c.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+                    <div className="mt-4 text-gold text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Learn More <ChevronRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="text-gold font-semibold text-sm uppercase tracking-widest">Why Choose Us</span>
+              <h2 className="mt-3 text-foreground text-balance">The Wave Academy Advantage</h2>
+            </div>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((f, i) => (
+              <ScrollReveal key={f.title} delay={i * 80}>
+                <div className="flex gap-4 p-6 rounded-xl hover:bg-muted/50 transition-colors duration-300">
+                  <div className="shrink-0 w-12 h-12 rounded-lg bg-navy flex items-center justify-center">
+                    <f.icon className="h-5 w-5 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">{f.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Meet Our Faculty */}
+      {facultyList && facultyList.length > 0 && (
+        <section className="py-24 bg-background">
+          <div className="container mx-auto px-4">
+            <ScrollReveal>
+              <div className="text-center mb-16">
+                <span className="text-gold font-semibold text-sm uppercase tracking-widest">Expert Educators</span>
+                <h2 className="mt-3 text-foreground text-balance">Meet Our Faculty</h2>
+                <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-pretty">
+                  Guided by experienced educators and defence veterans who are passionate about nurturing every student's potential.
+                </p>
+              </div>
+            </ScrollReveal>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {facultyList.map((f: any, i: number) => (
+                <ScrollReveal key={f.id} delay={i * 100}>
+                  <div className="group bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-gold/30 transition-all duration-300 h-full">
+                    {/* Avatar */}
+                    {f.photo_url ? (
+                      <img src={f.photo_url} alt={f.name} className="w-24 h-24 rounded-full object-cover border-4 border-gold/20 group-hover:border-gold/50 transition-colors mb-4 shadow-md" />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-navy to-navy-light flex items-center justify-center border-4 border-gold/20 group-hover:border-gold/50 transition-colors mb-4 shadow-md">
+                        <GraduationCap className="h-10 w-10 text-gold" />
+                      </div>
+                    )}
+
+                    {/* Name & subject */}
+                    <h3 className="font-display font-bold text-foreground text-base leading-tight">{f.name}</h3>
+                    <p className="text-gold font-semibold text-sm mt-1">{f.subject}</p>
+
+                    {/* Qualification */}
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{f.qualification}</p>
+
+                    {/* Experience badge */}
+                    {f.experience && (
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs bg-muted px-3 py-1 rounded-full text-muted-foreground border border-border">
+                        <Clock className="h-3 w-3" /> {f.experience}
+                      </span>
+                    )}
+
+                    {/* Bio */}
+                    {f.bio && (
+                      <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-3 text-pretty">{f.bio}</p>
+                    )}
+
+                    {/* Achievement pills */}
+                    {f.achievements?.length > 0 && (
+                      <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+                        {f.achievements.slice(0, 3).map((a: string, j: number) => (
+                          <span key={j} className="text-xs bg-gold/10 text-gold px-2.5 py-0.5 rounded-full border border-gold/20 font-medium">
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Testimonials */}
+      <section className="py-24 bg-navy">
+        <div className="container mx-auto px-4">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="text-gold font-semibold text-sm uppercase tracking-widest">Testimonials</span>
+              <h2 className="mt-3 text-gold-light text-balance">What Our Students Say</h2>
+            </div>
+          </ScrollReveal>
+          <div className="grid md:grid-cols-3 gap-8">
+            {displayTestimonials.map((t, i) => (
+              <ScrollReveal key={t.name} delay={i * 120}>
+                <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 h-full flex flex-col">
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating || 5 }).map((_, j) => (
+                      <Star key={j} className="h-4 w-4 fill-gold text-gold" />
+                    ))}
+                  </div>
+                  <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty">"{t.text}"</p>
+                  <div className="mt-6 pt-4 border-t border-navy-light/30">
+                    <div className="font-semibold text-gold-light text-sm">{t.name}</div>
+                    <div className="text-xs text-gold-muted mt-0.5">{t.role}</div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <ScrollReveal>
+            <div className="max-w-3xl mx-auto text-center bg-navy rounded-2xl p-12 md:p-16">
+              <h2 className="text-gold-light text-balance">Ready to Start Your Journey?</h2>
+              <p className="mt-4 text-gold-muted max-w-lg mx-auto text-pretty">
+                Join thousands of successful students who chose Wave Academy as their launchpad to excellence.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
+                <Link to="/enroll">
+                  <Button variant="gold" size="xl">Enroll Now</Button>
+                </Link>
+                <Link to="/contact">
+                  <Button variant="gold-outline" size="xl">Contact Us</Button>
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+    </div>
+  );
+}

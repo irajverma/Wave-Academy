@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 30% 97%;
+    --foreground: 220 40% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 13%;
+
+    --primary: 222 55% 18%;
+    --primary-foreground: 43 72% 65%;
+
+    --secondary: 220 25% 93%;
+    --secondary-foreground: 222 55% 18%;
+
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 15% 46%;
+
+    --accent: 43 72% 55%;
+    --accent-foreground: 222 55% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 43 72% 55%;
+
+    --radius: 0.625rem;
+
+    /* Custom tokens */
+    --navy: 222 55% 18%;
+    --navy-light: 222 45% 25%;
+    --navy-dark: 222 60% 10%;
+    --gold: 43 72% 55%;
+    --gold-light: 43 72% 70%;
+    --gold-dark: 43 72% 42%;
+    --gold-muted: 43 30% 85%;
+
+    --sidebar-background: 222 55% 12%;
+    --sidebar-foreground: 220 20% 90%;
+    --sidebar-primary: 43 72% 55%;
+    --sidebar-primary-foreground: 222 55% 12%;
+    --sidebar-accent: 222 45% 20%;
+    --sidebar-accent-foreground: 220 20% 90%;
+    --sidebar-border: 222 40% 22%;
+    --sidebar-ring: 43 72% 55%;
+
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    overflow-wrap: break-word;
+  }
+
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight; }
+  h2 { @apply text-3xl md:text-4xl font-bold leading-tight; }
+  h3 { @apply text-xl md:text-2xl font-semibold; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
+/* Animations */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); filter: blur(4px); }
+  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); filter: blur(4px); }
+  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+@keyframes wave-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 hsla(43, 72%, 55%, 0.4); }
+  50% { box-shadow: 0 0 0 12px hsla(43, 72%, 55%, 0); }
+}
