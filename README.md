@@ -4,6 +4,8 @@
 
 A full-stack educational platform for Wave Academy — featuring a public-facing website for students and a private admin panel for teachers to manage courses, enrollments, test results, faculty profiles, and testimonials.
 
+**🌐 Live Site**: [https://wave-academy-jet.vercel.app/](https://wave-academy-jet.vercel.app/)
+
 ---
 
 ## 🚀 Live Features
