@@ -101,7 +101,9 @@ export default function HomePage() {
         <div className="bg-gold text-navy text-center py-3 px-4 text-sm font-semibold animate-fade-in relative z-50">
           {settings.announcement_text}
         </div>
-            {/* Hero */}
+      )}
+
+      {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center bg-navy overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30"
@@ -139,7 +141,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-     )}
 
           {/* Stats bar */}
           <div
