@@ -101,126 +101,45 @@ export default function HomePage() {
         <div className="bg-gold text-navy text-center py-3 px-4 text-sm font-semibold animate-fade-in relative z-50">
           {settings.announcement_text}
         </div>
-      )}
-      {/* Hero */}
+            {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center bg-navy overflow-hidden">
-        {banners && banners.length > 0 ? (
-          banners.map((banner, idx) => (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                idx === currentBanner ? "opacity-100 z-0" : "opacity-0 -z-10"
-              }`}
-            >
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-40"
-                style={{ backgroundImage: `url(${banner.image_url})` }}
-              />
-            </div>
-          ))
-        ) : (
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{ backgroundImage: `url(${heroBg})` }}
-          />
-        )}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/60 z-0" />
 
         <div className="container mx-auto px-4 relative z-10 py-32">
-          <div className="max-w-3xl min-h-[250px] relative">
-            {banners && banners.length > 0 ? (
-              banners.map((banner, idx) => (
-                <div
-                  key={`text-${banner.id}`}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                    idx === currentBanner
-                      ? "opacity-100 translate-x-0 pointer-events-auto"
-                      : "opacity-0 translate-x-8 -z-10 pointer-events-none"
-                  }`}
-                >
-                  {banner.title && (
-                    <h1 className="text-gold-light leading-[1.1] text-balance mb-6">
-                      {banner.title}
-                    </h1>
-                  )}
-                  {banner.description && (
-                    <p className="text-lg text-gold-muted max-w-lg leading-relaxed text-pretty mb-8 line-clamp-4">
-                      {banner.description}
-                    </p>
-                  )}
-                  {banner.link && (
-                    <div className="flex gap-4">
-                      <Link to={banner.link}>
-                        <Button variant="hero" size="xl">
-                          Learn More <ChevronRight className="h-5 w-5 ml-2" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div
-                className="opacity-0 animate-fade-up pointer-events-auto"
-                style={{ animationDelay: "400ms", animationFillMode: "forwards" }}
-              >
-                <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/10 text-gold text-sm font-medium mb-6">
-                  Classes 5–12 · NDA · CUET · Sainik School
-                </div>
-                <h1 className="text-gold-light leading-[1.1] text-balance">
-                  Ride the Wave <br />to Academic <span className="text-gold">Excellence</span>
-                </h1>
-                <p className="mt-6 text-lg text-gold-muted max-w-lg leading-relaxed text-pretty">
-                  Expert-led coaching with personalized attention, rigorous test series, 
-                  and a proven track record of turning aspirations into achievements.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <Link to="/enroll">
-                    <Button variant="hero" size="xl">
-                      Enroll Now <ChevronRight className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link to="/courses">
-                    <Button variant="hero-outline" size="xl">
-                      Explore Courses
-                    </Button>
-                  </Link>
-                </div>
+          <div className="max-w-3xl">
+            <div
+              className="opacity-0 animate-fade-up pointer-events-auto"
+              style={{ animationDelay: "400ms", animationFillMode: "forwards" }}
+            >
+              <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/10 text-gold text-sm font-medium mb-6">
+                Classes 5–12 · NDA · CUET · Sainik School
               </div>
-            )}
-          </div>
-
-          {/* Banner Controls */}
-          {banners && banners.length > 1 && (
-            <div className="flex items-center gap-4 mt-8 lg:mt-12 z-20 relative">
-              <button
-                onClick={() => setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length)}
-                className="w-10 h-10 rounded-full bg-navy border border-gold/20 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors pointer-events-auto"
-                aria-label="Previous banner"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setCurrentBanner((prev) => (prev + 1) % banners.length)}
-                className="w-10 h-10 rounded-full bg-navy border border-gold/20 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors pointer-events-auto"
-                aria-label="Next banner"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-              <div className="flex items-center gap-2 ml-4">
-                {banners.map((_, idx) => (
-                  <button
-                    key={`dot-${idx}`}
-                    onClick={() => setCurrentBanner(idx)}
-                    className={`h-2 rounded-full transition-all pointer-events-auto ${
-                      idx === currentBanner ? "w-8 bg-gold" : "w-2 bg-gold/30"
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
+              <h1 className="text-gold-light leading-[1.1] text-balance">
+                Ride the Wave <br />to Academic <span className="text-gold">Excellence</span>
+              </h1>
+              <p className="mt-6 text-lg text-gold-muted max-w-lg leading-relaxed text-pretty">
+                Expert-led coaching with personalized attention, rigorous test series, 
+                and a proven track record of turning aspirations into achievements.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link to="/enroll">
+                  <Button variant="hero" size="xl">
+                    Enroll Now <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/courses">
+                  <Button variant="hero-outline" size="xl">
+                    Explore Courses
+                  </Button>
+                </Link>
               </div>
             </div>
-          )}
+          </div>
+     )}
 
           {/* Stats bar */}
           <div

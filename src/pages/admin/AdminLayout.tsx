@@ -15,7 +15,6 @@ const sidebarLinks = [
   { label: "Test Results", icon: ClipboardList, href: "/admin/results" },
   { label: "Testimonials", icon: Star, href: "/admin/testimonials" },
   { label: "Faculty", icon: UserSquare2, href: "/admin/faculty" },
-  { label: "Banners", icon: Image, href: "/admin/banners" },
   { label: "Settings", icon: Settings, href: "/admin/settings" },
 ];
 
