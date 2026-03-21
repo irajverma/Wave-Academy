@@ -324,9 +324,9 @@ export default function AdminFaculty() {
                       <GraduationCap className="h-6 w-6 text-gold" />
                     </div>
                   )}
-                  <div>
-                    <p className="font-semibold text-foreground text-sm leading-tight">{t.name}</p>
-                    <p className="text-xs text-gold">{t.subject}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground text-sm leading-tight truncate">{t.name}</p>
+                    <p className="text-xs text-gold truncate">{t.subject}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

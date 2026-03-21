@@ -300,7 +300,7 @@ export default function AdminResults() {
             <tbody>
               {results.map((r) => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                  <td className="py-3 px-4 font-medium text-foreground">{r.student_name}</td>
+                  <td className="py-3 px-4 font-medium text-foreground max-w-[120px] sm:max-w-none truncate">{r.student_name}</td>
                   <td className="py-3 px-4 text-muted-foreground">{r.test_name}</td>
                   <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">{r.subject}</td>
                   <td className="py-3 px-4">

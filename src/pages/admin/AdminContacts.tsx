@@ -65,12 +65,12 @@ export default function AdminContacts() {
       <h1 className="text-2xl font-display font-bold text-foreground">Inbox</h1>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-border">
+      <div className="flex gap-2 border-b border-border overflow-x-auto no-scrollbar scroll-smooth">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-gold text-foreground"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -134,9 +134,9 @@ export default function AdminContacts() {
                       : <MessageSquare className="h-5 w-5 text-blue-500" />
                     }
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{c.name}</p>
-                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground truncate">{c.name}</p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                       {c.phone && (
                         <span className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Phone className="h-3 w-3" /> {c.phone}
@@ -203,12 +203,12 @@ export default function AdminContacts() {
                     </div>
                   </div>
 
-              {/* Message / Enrollment details */}
-              {c.message && (
-                <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{c.message}</p>
-                </div>
-              )}
+               {/* Message / Enrollment details */}
+               {c.message && (
+                 <div className="mt-3 pt-3 border-t border-border overflow-hidden">
+                   <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line break-words">{c.message}</p>
+                 </div>
+               )}
             </div>
           ))}
         </div>
