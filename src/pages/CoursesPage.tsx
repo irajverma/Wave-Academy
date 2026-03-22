@@ -32,9 +32,10 @@ export default function CoursesPage() {
       return data;
     },
     retry: 1,
+    staleTime: 5000,
   });
 
-  // Use DB courses if available; fall back to demo data when DB is empty or errored
+  // Use DB courses if available; fall back to demo data when DB is empty, errored, or still loading
   const allCourses = (dbCourses && dbCourses.length > 0) ? dbCourses : FALLBACK_COURSES;
 
   // Group courses into visual sub-sections automatically
@@ -83,9 +84,13 @@ export default function CoursesPage() {
       {/* Dynamic Course Categories */}
       <section className="py-20 bg-background min-h-[50vh]">
         <div className="container mx-auto px-4 space-y-20">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-32 text-muted-foreground animate-pulse">Loading amazing courses...</div>
-          ) : categories.length === 0 ? (
+          {isLoading && !dbCourses && (
+            <div className="flex justify-center items-center py-4 text-gold animate-pulse text-sm font-medium italic">
+              Updating with latest courses...
+            </div>
+          )}
+          
+          {categories.length === 0 && !isLoading ? (
             <div className="text-center text-muted-foreground py-12">No courses are currently available. Please check back later!</div>
           ) : (
             categories.map((cat: any, ci: number) => (

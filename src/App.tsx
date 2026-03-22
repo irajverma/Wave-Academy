@@ -12,6 +12,7 @@ import CoursesPage from "@/pages/CoursesPage";
 import ContactPage from "@/pages/ContactPage";
 import EnrollPage from "@/pages/EnrollPage";
 import FacultyPage from "@/pages/FacultyPage";
+import GalleryPage from "@/pages/GalleryPage";
 import StudentResultsPage from "@/pages/StudentResultsPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import AdminLayout from "@/pages/admin/AdminLayout";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/enroll" element={<EnrollPage />} />
             <Route path="/faculty" element={<FacultyPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/results" element={<StudentResultsPage />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin" element={<AdminLayout />}>

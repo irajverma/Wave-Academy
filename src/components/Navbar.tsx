@@ -7,8 +7,8 @@ const navLinks = [
   { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
     { label: "Faculty", href: "/faculty" },
-    { label: "Gallery", href: "/#gallery" },
-    { label: "Results", href: "/results" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Results", href: "/results" },
   { label: "About", href: "/#about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -31,6 +31,7 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isHashLink = link.href.startsWith("/#");
+
             return isHashLink ? (
               <a
                 key={link.href}

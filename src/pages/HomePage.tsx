@@ -344,7 +344,16 @@ export default function HomePage() {
       )}
 
       {/* Gallery Section */}
-      <Gallery />
+      <section className="bg-background">
+        <Gallery />
+        <div className="container mx-auto px-4 pb-20 text-center -mt-12">
+          <Link to="/gallery">
+            <Button variant="outline" size="lg" className="rounded-full border-gold text-gold hover:bg-gold hover:text-navy transition-all px-8">
+              View All Photos <ImageIcon className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       {/* Testimonials */}
       <section className="py-24 bg-navy">
