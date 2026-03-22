@@ -100,26 +100,53 @@ export default function AdminResults() {
     reader.onload = async (e) => {
       try {
         const data = e.target?.result;
-        const workbook = xlsx.read(data, { type: "binary" });
+        // Use cellDates: true to automatically convert Excel serial dates to JS Date objects
+        const workbook = xlsx.read(data, { type: "binary", cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = xlsx.utils.sheet_to_json(worksheet);
 
-        // Map json to payloads
+        // Map json to payloads with robust column matching and date formatting
         const payloads = json.map((row: any) => {
-          const score = Number(row.Score || row.score);
-          const total = Number(row.Total || row.total_marks || row["Total Marks"]);
+          // Normalize keys to lowercase for easier matching
+          const normalizedRow: any = {};
+          Object.keys(row).forEach(k => {
+            normalizedRow[k.toLowerCase().replace(/[\s_]/g, '')] = row[k];
+          });
+
+          const score = Number(normalizedRow.score || normalizedRow.marks || row.Score || 0);
+          const total = Number(normalizedRow.totalmarks || normalizedRow.total || row.Total || 100);
+          
+          let formattedDate = new Date().toISOString().split('T')[0];
+          const rawDate = row.Date || row.date || normalizedRow.date || normalizedRow.testdate;
+          
+          if (rawDate) {
+            // Handle Excel serial dates (numbers like 45000)
+            if (typeof rawDate === 'number' && rawDate > 30000) {
+              const d = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
+              if (!isNaN(d.getTime())) {
+                formattedDate = d.toISOString().split('T')[0];
+              }
+            } else {
+              const d = new Date(rawDate);
+              if (!isNaN(d.getTime())) {
+                formattedDate = d.toISOString().split('T')[0];
+              }
+            }
+          }
           
           return {
-            student_name: row.Name || row.student_name || row.StudentName || row["Student Name"],
-            student_email: row.Email || row.email || null,
-            test_name: row.Test || row.test_name || row["Test Name"] || "General Test",
-            subject: row.Subject || row.subject || "General",
+            student_name: row.Name || row.StudentName || normalizedRow.studentname || normalizedRow.name || row["Student Name"],
+            student_email: row.Email || normalizedRow.email || normalizedRow.studentemail || null,
+            test_name: row.Test || row.TestName || normalizedRow.testname || normalizedRow.test || "General Test",
+            subject: row.Subject || normalizedRow.subject || "General",
             score: isNaN(score) ? 0 : score,
             total_marks: isNaN(total) ? 100 : total,
-            test_date: row.Date || row.test_date || new Date().toISOString().split('T')[0],
+            test_date: formattedDate,
           };
-        }).filter(p => p.student_name); // Valid names only
+        }).filter(p => p.student_name);
+
+        console.log("Bulk Upload Payload Preview:", payloads);
 
         if (payloads.length === 0) {
           toast.error("No valid student names found in the Excel file!");
