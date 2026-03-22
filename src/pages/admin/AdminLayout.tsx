@@ -24,18 +24,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showRecovery, setShowRecovery] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-
-  useEffect(() => {
-    let timeout: any;
-    if (loading) {
-      timeout = setTimeout(() => setShowRecovery(true), 3000);
-    } else {
-      setShowRecovery(false);
-    }
-    return () => clearTimeout(timeout);
-  }, [loading]);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -43,31 +32,10 @@ export default function AdminLayout() {
     }
   }, [user, isAdmin, loading, navigate]);
 
-  const handleClearSession = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.reload();
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background pt-16">
-        <div className="animate-pulse text-muted-foreground mb-4">Loading...</div>
-        {showRecovery && (
-          <div className="animate-fade-in flex flex-col items-center gap-4 px-6 text-center">
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Taking longer than usual? A session conflict might be occurring.
-            </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleClearSession}
-              className="text-xs border-gold/30 text-gold hover:bg-gold/10"
-            >
-              Clear Session & Refresh
-            </Button>
-          </div>
-        )}
+      <div className="min-h-screen flex items-center justify-center bg-background pt-16">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
     );
   }
