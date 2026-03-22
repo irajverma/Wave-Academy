@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  LayoutDashboard, BookOpen, Users, ClipboardList, FileText, LogOut, GraduationCap, MessageSquare, Menu, Star, Settings, Image, UserSquare2
+  LayoutDashboard, BookOpen, Users, ClipboardList, FileText, LogOut, GraduationCap, MessageSquare, Menu, Star, Settings, Image, UserSquare2, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -24,6 +24,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -87,11 +88,23 @@ export default function AdminLayout() {
 
         <div className="p-4 border-t border-navy-light/30">
           <button
-            onClick={signOut}
-            className="flex items-center gap-2 text-sm text-gold-muted hover:text-gold transition-colors w-full"
+            onClick={async () => {
+              setIsSigningOut(true);
+              try {
+                await signOut();
+              } finally {
+                setIsSigningOut(false);
+              }
+            }}
+            disabled={isSigningOut}
+            className="flex items-center gap-2 text-sm text-gold-muted hover:text-gold transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <LogOut className="h-4 w-4" />
-            Sign Out
+            {isSigningOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
           </button>
         </div>
       </aside>

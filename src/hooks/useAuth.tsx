@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -89,9 +90,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsAdmin(false);
+    try {
+      await supabase.auth.signOut();
+      toast.success("Signed out successfully");
+    } catch (err) {
+      console.error("Sign out error:", err);
+      toast.error("Error during sign out, but session cleared locally");
+    } finally {
+      setUser(null);
+      setIsAdmin(false);
+    }
   };
 
   return (
