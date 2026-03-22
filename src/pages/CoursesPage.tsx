@@ -90,69 +90,64 @@ export default function CoursesPage() {
         </div>
       </section>
 
-      {/* Dynamic Course Categories */}
-      <section className="py-20 bg-background min-h-[50vh]">
-        <div className="container mx-auto px-4 space-y-20">
-          {isLoading && !dbCourses && (
-            <div className="flex justify-center items-center py-4 text-gold animate-pulse text-sm font-medium italic">
-              Updating with latest courses...
-            </div>
-          )}
-          
-          {categories.length === 0 && !isLoading ? (
-            <div className="text-center text-muted-foreground py-12">No courses are currently available. Please check back later!</div>
-          ) : (
-            categories.map((cat: any, ci: number) => (
-              <ScrollReveal key={cat.id} delay={ci * 80}>
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <cat.icon className="h-7 w-7 text-gold" />
-                    <h2 className="text-foreground">{cat.title}</h2>
-                  </div>
-                  <p className="text-muted-foreground mb-8">{cat.subtitle}</p>
+      <section className="py-16 bg-background min-h-[50vh]">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {allCourses.map((course: any, ci: number) => {
+              const catId = (course.category || "other").toLowerCase().trim().replace(/–/g, "-");
+              const meta = CAT_META[catId] || { title: course.category || "Other", icon: Boxes, gradient: "from-indigo-500/15 to-indigo-600/5" };
+              const Icon = meta.icon;
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {cat.courses.map((course: any) => (
-                      <div
-                        key={course.id}
-                        className={`p-8 rounded-xl bg-gradient-to-br ${cat.gradient} border border-border/50 hover:shadow-lg transition-shadow duration-300`}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            {course.duration || "Self-paced"}
-                          </div>
-                          {course.price && (
-                            <div className="text-gold font-semibold bg-gold/10 px-3 py-1 rounded-full text-sm">
-                              {course.price}
-                            </div>
-                          )}
-                        </div>
-                        <h3 className="text-foreground text-xl">{course.title}</h3>
-                        {course.description && (
-                          <p className="mt-3 text-sm text-muted-foreground leading-relaxed text-pretty">
-                            {course.description}
-                          </p>
-                        )}
-                        {course.features && course.features.length > 0 && (
-                          <ul className="mt-5 space-y-2 flex-grow">
-                            {course.features.map((f: string, i: number) => (
-                              <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                                <CheckCircle className="h-4 w-4 mt-0.5 text-gold shrink-0" />
-                                <span>{f}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <Link to="/enroll" className="inline-flex items-center gap-1 mt-6 text-gold font-semibold text-sm hover:gap-2 transition-all">
-                          Enroll Now <ChevronRight className="h-4 w-4" />
-                        </Link>
+              return (
+                <ScrollReveal key={course.id || ci} delay={ci * 50}>
+                  <div
+                    className={`h-full flex flex-col p-8 rounded-2xl bg-gradient-to-br ${meta.gradient} border border-border/40 hover:shadow-xl transition-all duration-300 group`}
+                  >
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2 px-3 py-1.2 rounded-full bg-background/50 border border-border/30 backdrop-blur-sm">
+                        <Icon className="h-4 w-4 text-gold" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{meta.title}</span>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                        <Clock className="h-3.5 w-3.5" />
+                        {course.duration || "Self-paced"}
+                      </div>
+                    </div>
+
+                    <h3 className="text-foreground text-xl font-bold leading-tight group-hover:text-gold transition-colors">{course.title}</h3>
+                    
+                    {course.price && (
+                      <div className="mt-2 text-gold font-bold text-lg">
+                        {course.price}
+                      </div>
+                    )}
+
+                    {course.description && (
+                      <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                        {course.description}
+                      </p>
+                    )}
+
+                    <div className="mt-6 space-y-3 flex-grow border-t border-border/20 pt-6">
+                      {course.features && course.features.slice(0, 4).map((f: string, i: number) => (
+                        <div key={i} className="flex items-start gap-2.5 text-xs text-foreground/80 font-medium">
+                          <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-gold shrink-0" />
+                          <span>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Link to="/enroll" className="inline-flex items-center gap-1.5 mt-8 text-gold font-bold text-sm hover:translate-x-1 transition-transform">
+                      Enroll Now <ChevronRight className="h-4 w-4" />
+                    </Link>
                   </div>
-                </div>
-              </ScrollReveal>
-            ))
+                </ScrollReveal>
+              );
+            })}
+          </div>
+          
+          {allCourses.length === 0 && !isLoading && (
+            <div className="text-center text-muted-foreground py-12">No courses are currently available. Please check back later!</div>
           )}
         </div>
       </section>
