@@ -9,18 +9,24 @@ import {
 
 // Visual templates for core categories mapping
 const CAT_META: Record<string, any> = {
-  "5-10": { title: "Classes 5–10", subtitle: "Academic Foundation", icon: BookOpen, gradient: "from-blue-500/15 to-blue-600/5" },
-  "11-12": { title: "Classes 11–12", subtitle: "Board Mastery", icon: GraduationCap, gradient: "from-emerald-500/15 to-emerald-600/5" },
-  "nda": { title: "NDA Preparation", subtitle: "Defence Careers", icon: Shield, gradient: "from-amber-500/15 to-amber-600/5" },
-  "cuet": { title: "CUET Preparation", subtitle: "University Entrance", icon: Target, gradient: "from-rose-500/15 to-rose-600/5" },
+  "5-8": { title: "Classes 5–8", subtitle: "Foundation Years", icon: BookOpen, gradient: "from-blue-500/15 to-blue-600/5" },
+  "9-10": { title: "Classes 9–10", subtitle: "Secondary Excellence", icon: Target, gradient: "from-emerald-500/15 to-emerald-600/5" },
+  "11-12": { title: "Classes 11–12", subtitle: "Higher Secondary", icon: GraduationCap, gradient: "from-amber-500/15 to-amber-600/5" },
+  "commerce": { title: "Commerce (11–12)", subtitle: "Business & Management", icon: Boxes, gradient: "from-indigo-500/15 to-indigo-600/5" },
+  "nda": { title: "NDA & CDS", subtitle: "Defense Careers", icon: Shield, gradient: "from-rose-500/15 to-rose-600/5" },
+  "clat": { title: "CLAT Exam", subtitle: "Legal Careers", icon: Target, gradient: "from-orange-500/15 to-orange-600/5" },
+  "sainik": { title: "Sainik School", subtitle: "Entrance Preparation", icon: Shield, gradient: "from-cyan-500/15 to-cyan-600/5" },
 };
 
 // Fallback courses shown when DB has no data or can't be reached
 const FALLBACK_COURSES = [
-  { id: "f1", title: "Foundation Program (Classes 5–10)", category: "5-10", duration: "1 Academic Year", price: "₹12,000/year", description: "Strong concept-driven teaching for Classes 5 to 10, covering all subjects with regular assessments.", features: ["Conceptual clarity focus", "Weekly tests & feedback", "Olympiad preparation", "Parent-teacher meetings"] },
-  { id: "f2", title: "Board Excellence (Classes 11–12)", category: "11-12", duration: "2 Years", price: "₹18,000/year", description: "Board exam mastery with competitive exam preparation for Science and Commerce students.", features: ["Board + competitive dual focus", "Mock board examinations", "Chapter-wise notes", "Expert faculty"] },
-  { id: "f3", title: "NDA Written + SSB Coaching", category: "nda", duration: "6–12 Months", price: "₹25,000", description: "Comprehensive NDA & CDS preparation covering all GAT subjects, Mathematics, and SSB personality development.", features: ["Full syllabus coverage", "SSB interview training", "Physical fitness guidance", "Previous year papers"] },
-  { id: "f4", title: "CUET Crash Course", category: "cuet", duration: "4 Months", price: "₹15,000", description: "Targeted coaching for CUET General Test and domain subjects to secure admission in top central universities.", features: ["Domain subject mastery", "General Test strategies", "Mock CUET tests", "Score improvement guarantee"] },
+  { id: "f1", title: "Classes 5–8 Foundation", category: "5-8", duration: "12 Months", price: "₹1,000/month", description: "Strong concept-driven teaching for middle school students with regular assessments.", features: ["Conceptual clarity focus", "Weekly tests & feedback", "English & Maths focus", "Personalized attention"] },
+  { id: "f2", title: "Classes 9–10 Secondary", category: "9-10", duration: "12 Months", price: "₹1,250/month", description: "Daily 2 hours of intensive coaching to build a rock-solid foundation for board exams.", features: ["Daily 2-hour sessions", "Subject-wise mastery", "Regular board-pattern tests", "Performance tracking"] },
+  { id: "f3", title: "Classes 11–12 (Science)", category: "11-12", duration: "12 Months", price: "₹600/subject/month", description: "Expert-led coaching for Science stream students focusing on board excellence and competitive concepts.", features: ["Expert Faculty", "Physics, Chemistry, Maths, Bio", "Detailed study material", "Doubt-clearing sessions"] },
+  { id: "f4", title: "Commerce Stream", category: "commerce", duration: "12 Months", price: "₹600/subject/month", description: "Comprehensive coaching for Accountancy, Business Studies, and Economics for board success.", features: ["Board Exam Focus", "Accountancy mastery", "Regular practice tests", "Concept-based learning"] },
+  { id: "f5", title: "NDA & CDS Full Course", category: "nda", duration: "1 Academic Year", price: "₹25,000/year", description: "Complete preparation for NDA and CDS written exams, including aptitude and career guidance.", features: ["Written exam prep", "Mathematics & Aptitude", "General Ability Test (GAT)", "Career Guidance & SSB tips"] },
+  { id: "f6", title: "CLAT Preparation", category: "clat", duration: "1 Academic Year", price: "₹20,000/year", description: "Dedicated coaching for CLAT written exam preparation and legal career guidance.", features: ["Legal Reasoning", "Current Affairs & GK", "English & Logical Reasoning", "Career Guidance"] },
+  { id: "f7", title: "Sainik School Entrance", category: "sainik", duration: "12 Months", price: "₹20,000/month", description: "Intensive preparation for Sainik School entrance exams with written prep and career guidance.", features: ["Written exam preparation", "Intelligence & IQ tests", "Mock interviews", "Career Guidance"] },
 ];
 
 export default function CoursesPage() {
@@ -41,10 +47,13 @@ export default function CoursesPage() {
   // Group courses into visual sub-sections automatically
   const groupedCourses = allCourses.reduce((acc: any, course: any) => {
     let catId = (course.category || "other").toLowerCase().trim();
-    if (catId.includes("5-10") || catId.includes("5–10")) catId = "5-10";
+    if (catId.includes("5-8") || catId.includes("5–8")) catId = "5-8";
+    if (catId.includes("9-10") || catId.includes("9–10")) catId = "9-10";
     if (catId.includes("11-12") || catId.includes("11–12")) catId = "11-12";
+    if (catId.includes("commerce")) catId = "commerce";
     if (catId.includes("nda")) catId = "nda";
-    if (catId.includes("cuet")) catId = "cuet";
+    if (catId.includes("clat")) catId = "clat";
+    if (catId.includes("sainik")) catId = "sainik";
     
     if (!acc[catId]) {
       acc[catId] = {

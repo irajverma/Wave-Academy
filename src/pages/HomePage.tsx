@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   BookOpen, Users, Trophy, Target, Star, ChevronRight, ChevronLeft,
   GraduationCap, Clock, Shield, TrendingUp, Phone, Mail, MapPin, 
-  Image as ImageIcon
+  Image as ImageIcon, Boxes
 } from "lucide-react";
 import { Gallery } from "@/components/Gallery";
 import {
@@ -30,10 +30,13 @@ const stats = [
 ];
 
 const courses = [
-  { title: "Classes 5–10", desc: "Strong academic foundation with concept-driven teaching", icon: BookOpen, color: "from-blue-500/20 to-blue-600/5" },
-  { title: "Classes 11–12", desc: "Board exam mastery with competitive edge preparation", icon: GraduationCap, color: "from-emerald-500/20 to-emerald-600/5" },
-  { title: "NDA Coaching", desc: "Comprehensive NDA & CDS exam preparation program", icon: Shield, color: "from-amber-500/20 to-amber-600/5" },
-  { title: "CUET Preparation", desc: "Targeted coaching for university entrance success", icon: Target, color: "from-rose-500/20 to-rose-600/5" },
+  { title: "Classes 5–8", desc: "Foundation years coaching with ₹1,000 monthly fee", icon: BookOpen, color: "from-blue-500/20 to-blue-600/5" },
+  { title: "Classes 9–10", desc: "Secondary excellence with daily 2-hour intensive sessions", icon: Target, color: "from-emerald-500/20 to-emerald-600/5" },
+  { title: "Classes 11–12", desc: "Board mastery with expert faculty at ₹600 per subject", icon: GraduationCap, color: "from-amber-500/20 to-amber-600/5" },
+  { title: "Commerce", desc: "Comprehensive stream support for Accountancy & Economics", icon: Boxes, color: "from-indigo-500/20 to-indigo-600/5" },
+  { title: "NDA & CDS", desc: "Full year preparation for written exams and career guidance", icon: Shield, color: "from-rose-500/20 to-rose-600/5" },
+  { title: "CLAT Exam", desc: "Dedicated preparation for legal careers at ₹20,000 yearly", icon: Target, color: "from-orange-500/20 to-orange-600/5" },
+  { title: "Sainik School", desc: "Intensive entrance coaching with monthly guidance", icon: Shield, color: "from-cyan-500/20 to-cyan-600/5" },
 ];
 
 const features = [
@@ -46,18 +49,22 @@ const features = [
 ];
 
 const testimonials = [
+  { name: "Raj Verma", role: "VIT Bhopal", text: "Wave Academy provided me with the solid foundation needed to excel in my engineering journey. The faculty's dedication is unparalleled.", rating: 5 },
+  { name: "Nitya Sukhla", role: "BIT Mesra", text: "The structured approach to complex subjects helped me clear competitive exams with confidence. Highly recommended!", rating: 5 },
+  { name: "Ayushi Mishra", role: "Book Author & Hon. Political Science", text: "A truly inspirational learning environment. The focus on conceptual clarity helped me even in my career as a political science scholar and author.", rating: 5 },
+  { name: "Akashya Tripathi", role: "JEE Mains Cleared", text: "I owe my JEE success to the rigorous testing and personalized attention I received at Wave Academy. The teachers are always available for doubts.", rating: 5 },
+  { name: "Prakash Mishra", role: "100 in Maths, 12th Board", text: "Scoring a perfect 100 was possible only because of the shortcut methods and constant practice sessions here. Best coaching in town!", rating: 5 },
+  { name: "Tanu Singh", role: "VIT Bhopal", text: "From board preparation to university entrance, Wave Academy guided me every step of the way. I'm proud to be an alumna.", rating: 5 },
   { name: "Arjun Mehta", role: "NDA Selected, 2024", text: "Wave Academy's structured approach and mock tests were instrumental in my NDA selection. The faculty truly cares about each student's success.", rating: 5 },
-  { name: "Priya Sharma", role: "CUET Topper, 2024", text: "The CUET preparation here was outstanding. From strategy sessions to daily practice, everything was perfectly organized.", rating: 5 },
-  { name: "Rahul Verma", role: "Class 12, Board Topper", text: "I scored 96% in my boards thanks to Wave Academy. The teachers made even the toughest concepts feel simple.", rating: 5 },
-  { name: "Sneha Gupta", role: "NEET Aspirant", text: "The personalized attention and flexible timings allowed me to balance my schoolwork and competitive prep seamlessly.", rating: 5 },
-  { name: "Vikram Singh", role: "Sainik School Selected", text: "The discipline and rigorous testing completely transformed my approach to studies. I owe my selection to the amazing team here.", rating: 5 },
-  { name: "Ananya Patel", role: "Class 10 Topper", text: "Regular assessments and doubt sessions ensured I was always on track. The study material is top-notch and very comprehensive.", rating: 5 },
 ];
 
 export default function HomePage() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
+  );
+  const courseAutoplay = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
   const { data: banners } = useQuery({
@@ -189,21 +196,38 @@ export default function HomePage() {
               </p>
             </div>
           </ScrollReveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {courses.map((c, i) => (
-              <ScrollReveal key={c.title} delay={i * 100}>
-                <Link to="/courses" className="group block">
-                  <div className={`h-full p-6 rounded-xl bg-gradient-to-br ${c.color} border border-border/50 hover:shadow-lg transition-shadow duration-300`}>
-                    <c.icon className="h-10 w-10 text-gold mb-4" />
-                    <h3 className="text-lg text-foreground">{c.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
-                    <div className="mt-4 text-gold text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Learn More <ChevronRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
+          <div className="w-full max-w-7xl mx-auto px-4">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[courseAutoplay.current]}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4">
+                {courses.map((c, i) => (
+                  <CarouselItem key={i} className="pl-4 sm:basis-1/2 lg:basis-1/4">
+                    <ScrollReveal delay={i * 100}>
+                      <Link to="/courses" className="group block h-full">
+                        <div className={`h-full p-6 rounded-xl bg-gradient-to-br ${c.color} border border-border/50 hover:shadow-lg transition-shadow duration-300 flex flex-col`}>
+                          <c.icon className="h-10 w-10 text-gold mb-4" />
+                          <h3 className="text-lg text-foreground">{c.title}</h3>
+                          <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-grow">{c.desc}</p>
+                          <div className="mt-4 text-gold text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Learn More <ChevronRight className="h-4 w-4" />
+                          </div>
+                        </div>
+                      </Link>
+                    </ScrollReveal>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex justify-center gap-4 mt-8 md:hidden">
+                <CarouselPrevious className="static translate-y-0" />
+                <CarouselNext className="static translate-y-0" />
+              </div>
+            </Carousel>
           </div>
         </div>
       </section>
