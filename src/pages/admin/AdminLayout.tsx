@@ -109,6 +109,9 @@ export default function AdminLayout() {
 
         <main className="flex-1 p-3 sm:p-4 lg:p-8 overflow-y-auto">
           <Outlet />
+          <div className="mt-12 pt-6 border-t border-border/50 text-center text-[10px] text-muted-foreground/50 italic">
+            Made with ❤️ by Raj
+          </div>
         </main>
       </div>
     </div>

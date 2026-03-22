@@ -70,8 +70,10 @@ export const Footer = () => (
         </div>
       </div>
 
-      <div className="mt-12 pt-8 border-t border-navy-light/30 text-center text-xs">
-        © {new Date().getFullYear()} Wave Academy. All rights reserved.
+      <div className="mt-12 pt-8 border-t border-navy-light/30 text-center text-xs flex flex-col sm:flex-row justify-center items-center gap-2">
+        <span>© {new Date().getFullYear()} Wave Academy. All rights reserved.</span>
+        <span className="hidden sm:inline text-navy-light/40">•</span>
+        <span className="opacity-80">Made with ❤️ by Raj</span>
       </div>
     </div>
   </footer>
