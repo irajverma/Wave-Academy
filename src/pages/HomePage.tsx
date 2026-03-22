@@ -173,51 +173,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <ScrollReveal direction="left">
-              <div className="space-y-6">
-                <span className="text-gold font-semibold text-sm uppercase tracking-widest">About Us</span>
-                <h2 className="text-foreground text-balance">
-                  Building Futures Since 2017
-                </h2>
-                <p className="text-muted-foreground leading-relaxed text-pretty">
-                  Wave Academy was founded with a singular mission — to provide world-class coaching 
-                  to students in smaller cities. Over 8 years, we've guided thousands of students 
-                  through board exams, NDA selections, CUET admissions, and Sainik School entrances.
-                </p>
-                <p className="text-muted-foreground leading-relaxed text-pretty">
-                  Our faculty comprises experienced educators from premier institutions who bring 
-                  both expertise and genuine care to the classroom. We believe every student 
-                  deserves the chance to excel.
-                </p>
-                <Link to="/contact">
-                  <Button variant="gold" size="lg" className="mt-2">
-                    Get in Touch
-                  </Button>
-                </Link>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal direction="right" delay={200}>
-              <div className="grid grid-cols-2 gap-4">
-                {stats.map((s, i) => (
-                  <div
-                    key={s.label}
-                    className={`p-6 rounded-xl bg-navy text-center ${
-                      i === 0 ? "col-span-2 md:col-span-1" : ""
-                    }`}
-                  >
-                    <div className="text-3xl font-bold text-gold font-display">{s.value}</div>
-                    <div className="text-sm text-gold-muted mt-2">{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
 
       {/* Courses Preview */}
       <section className="py-24 bg-muted/50">

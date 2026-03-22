@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export default function AdminEnrollments() {
   const queryClient = useQueryClient();
@@ -32,10 +34,58 @@ export default function AdminEnrollments() {
     return "bg-amber-100 text-amber-700 border-amber-200";
   };
 
+  const handleDownloadCSV = () => {
+    if (!enrollments || enrollments.length === 0) {
+      toast.error("No data to download");
+      return;
+    }
+
+    // Define CSV headers
+    const headers = ["Student Name", "Course", "Phone", "Class", "Parent Name", "Status", "Date"];
+    
+    // Map data to rows
+    const rows = enrollments.map((e: any) => [
+      e.student_name,
+      e.course || "N/A",
+      e.phone,
+      e.class || "N/A",
+      e.parent_name || "N/A",
+      e.status || "pending",
+      new Date(e.created_at).toLocaleDateString()
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Create a blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `enrollments_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Enrollment sheet downloaded");
+  };
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-display font-bold text-foreground">Enrollment Requests</h1>
+        <Button 
+          onClick={handleDownloadCSV}
+          variant="outline" 
+          className="flex items-center gap-2 border-gold text-gold hover:bg-gold hover:text-navy"
+          disabled={!enrollments || enrollments.length === 0}
+        >
+          <Download className="h-4 w-4" />
+          Download Sheet
+        </Button>
       </div>
 
       {isLoading ? (

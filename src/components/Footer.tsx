@@ -25,7 +25,6 @@ export const Footer = () => (
           <ul className="space-y-2 text-sm">
             {[
               { label: "Courses", href: "/courses" },
-              { label: "About Us", href: "/#about" },
               { label: "Contact", href: "/contact" },
               { label: "Enroll Now", href: "/enroll" },
             ].map((l) => (
