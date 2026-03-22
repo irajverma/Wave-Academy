@@ -5,9 +5,10 @@ import { Menu, X, GraduationCap, Shield } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Courses", href: "/courses" },
-  { label: "Faculty", href: "/faculty" },
-  { label: "Results", href: "/results" },
+    { label: "Courses", href: "/courses" },
+    { label: "Faculty", href: "/faculty" },
+    { label: "Gallery", href: "/#gallery" },
+    { label: "Results", href: "/results" },
   { label: "About", href: "/#about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -28,17 +29,37 @@ export const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`text-sm font-medium transition-colors duration-200 hover:text-gold ${
-                location.pathname === link.href ? "text-gold" : "text-gold-muted"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isHashLink = link.href.startsWith("/#");
+            return isHashLink ? (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                     e.preventDefault();
+                     const targetId = link.href.replace('/#', '');
+                     document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className={`text-sm font-medium transition-colors duration-200 hover:text-gold ${
+                  location.hash === link.href.replace('/', '') ? "text-gold" : "text-gold-muted"
+                }`}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`text-sm font-medium transition-colors duration-200 hover:text-gold ${
+                  location.pathname === link.href ? "text-gold" : "text-gold-muted"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
           <div className="flex items-center gap-2">
             <Link to="/enroll">
               <Button variant="gold" size="sm">Enroll Now</Button>
@@ -66,18 +87,39 @@ export const Navbar = () => {
         } bg-navy border-t border-navy-light/30`}
       >
         <div className="px-4 pb-4 pt-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              onClick={() => setOpen(false)}
-              className={`block py-3 font-medium transition-colors duration-200 border-b border-navy-light/20 last:border-0 ${
-                location.pathname === link.href ? "text-gold" : "text-gold-muted hover:text-gold"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isHashLink = link.href.startsWith("/#");
+            return isHashLink ? (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                     e.preventDefault();
+                     const targetId = link.href.replace('/#', '');
+                     document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setOpen(false);
+                }}
+                className={`block py-3 font-medium transition-colors duration-200 border-b border-navy-light/20 last:border-0 ${
+                  location.hash === link.href.replace('/', '') ? "text-gold" : "text-gold-muted hover:text-gold"
+                }`}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setOpen(false)}
+                className={`block py-3 font-medium transition-colors duration-200 border-b border-navy-light/20 last:border-0 ${
+                  location.pathname === link.href ? "text-gold" : "text-gold-muted hover:text-gold"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
           <Link to="/enroll" onClick={() => setOpen(false)}>
             <Button variant="gold" className="w-full mt-4">Enroll Now</Button>
           </Link>
