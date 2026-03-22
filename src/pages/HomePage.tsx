@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -9,8 +9,18 @@ import { db } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BookOpen, Users, Trophy, Target, Star, ChevronRight, ChevronLeft,
-  GraduationCap, Clock, Shield, TrendingUp, Phone, Mail, MapPin
+  GraduationCap, Clock, Shield, TrendingUp, Phone, Mail, MapPin, 
+  Image as ImageIcon
 } from "lucide-react";
+import { Gallery } from "@/components/Gallery";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const stats = [
   { value: "2,500+", label: "Students Coached" },
@@ -39,10 +49,16 @@ const testimonials = [
   { name: "Arjun Mehta", role: "NDA Selected, 2024", text: "Wave Academy's structured approach and mock tests were instrumental in my NDA selection. The faculty truly cares about each student's success.", rating: 5 },
   { name: "Priya Sharma", role: "CUET Topper, 2024", text: "The CUET preparation here was outstanding. From strategy sessions to daily practice, everything was perfectly organized.", rating: 5 },
   { name: "Rahul Verma", role: "Class 12, Board Topper", text: "I scored 96% in my boards thanks to Wave Academy. The teachers made even the toughest concepts feel simple.", rating: 5 },
+  { name: "Sneha Gupta", role: "NEET Aspirant", text: "The personalized attention and flexible timings allowed me to balance my schoolwork and competitive prep seamlessly.", rating: 5 },
+  { name: "Vikram Singh", role: "Sainik School Selected", text: "The discipline and rigorous testing completely transformed my approach to studies. I owe my selection to the amazing team here.", rating: 5 },
+  { name: "Ananya Patel", role: "Class 10 Topper", text: "Regular assessments and doubt sessions ensured I was always on track. The study material is top-notch and very comprehensive.", rating: 5 },
 ];
 
 export default function HomePage() {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true })
+  );
 
   const { data: banners } = useQuery({
     queryKey: ["site-banners"],
@@ -327,6 +343,9 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Gallery Section */}
+      <Gallery />
+
       {/* Testimonials */}
       <section className="py-24 bg-navy">
         <div className="container mx-auto px-4">
@@ -336,23 +355,38 @@ export default function HomePage() {
               <h2 className="mt-3 text-gold-light text-balance">What Our Students Say</h2>
             </div>
           </ScrollReveal>
-          <div className="grid md:grid-cols-3 gap-8">
-            {displayTestimonials.map((t, i) => (
-              <ScrollReveal key={t.name} delay={i * 120}>
-                <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 h-full flex flex-col">
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: t.rating || 5 }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-gold text-gold" />
-                    ))}
-                  </div>
-                  <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty">"{t.text}"</p>
-                  <div className="mt-6 pt-4 border-t border-navy-light/30">
-                    <div className="font-semibold text-gold-light text-sm">{t.name}</div>
-                    <div className="text-xs text-gold-muted mt-0.5">{t.role}</div>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
+          <div className="w-full max-w-6xl mx-auto px-12 md:px-0">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[autoplayPlugin.current]}
+              className="w-full relative"
+            >
+              <CarouselContent className="-ml-4 md:-ml-8">
+                {displayTestimonials.map((t, i) => (
+                  <CarouselItem key={i} className="pl-4 md:pl-8 md:basis-1/2 lg:basis-1/3">
+                    <ScrollReveal delay={i * 120}>
+                      <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 h-[280px] flex flex-col">
+                        <div className="flex gap-1 mb-4">
+                          {Array.from({ length: t.rating || 5 }).map((_, j) => (
+                            <Star key={j} className="h-4 w-4 fill-gold text-gold" />
+                          ))}
+                        </div>
+                        <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty overflow-hidden text-ellipsis line-clamp-4">"{t.text}"</p>
+                        <div className="mt-6 pt-4 border-t border-navy-light/30">
+                          <div className="font-semibold text-gold-light text-sm line-clamp-1">{t.name}</div>
+                          <div className="text-xs text-gold-muted mt-0.5 line-clamp-1">{t.role}</div>
+                        </div>
+                      </div>
+                    </ScrollReveal>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex -left-12 bg-navy border-gold/30 text-gold hover:bg-gold hover:text-navy transition-colors items-center justify-center p-0" />
+              <CarouselNext className="hidden md:flex -right-12 bg-navy border-gold/30 text-gold hover:bg-gold hover:text-navy transition-colors items-center justify-center p-0" />
+            </Carousel>
           </div>
         </div>
       </section>
