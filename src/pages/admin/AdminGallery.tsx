@@ -109,17 +109,52 @@ export default function AdminGallery() {
     let imageUrl = newImage.url;
 
     if (selectedFile) {
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        toast.error("Image must be smaller than 10 MB");
+        return;
+      }
+
       setIsUploading(true);
       try {
-        const fileExt = selectedFile.name.split('.').pop();
+        console.log(`[AdminGallery] Compressing ${selectedFile.name}...`);
+        
+        // Compress image client-side before upload
+        const compressedBlob = await new Promise<Blob>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              const MAX_DIM = 1200; // Good balance for gallery viewing
+              const scale = Math.min(MAX_DIM / img.width, MAX_DIM / img.height, 1);
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width * scale;
+              canvas.height = img.height * scale;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error("Canvas toBlob failed"));
+              }, "image/jpeg", 0.85);
+            };
+            img.onerror = () => reject(new Error("Failed to load image for compression"));
+            img.src = ev.target?.result as string;
+          };
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          reader.readAsDataURL(selectedFile);
+        });
+
+        const fileExt = "jpg"; // We forced to jpeg
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         const filePath = `${fileName}`;
         
-        console.log(`[AdminGallery] Uploading ${selectedFile.name} as ${filePath}...`);
-        console.log("[AdminGallery] Starting file upload to 'gallery' bucket:", filePath);
-        const { error: uploadError, data } = await supabase.storage
+        console.log(`[AdminGallery] Uploading compressed blob (${Math.round(compressedBlob.size / 1024)} KB) as ${filePath}...`);
+        
+        const { error: uploadError } = await supabase.storage
           .from('gallery')
-          .upload(filePath, selectedFile);
+          .upload(filePath, compressedBlob, {
+            contentType: 'image/jpeg',
+            upsert: false
+          });
 
         if (uploadError) {
           console.error("[AdminGallery] Storage upload error:", uploadError);
@@ -133,7 +168,7 @@ export default function AdminGallery() {
         console.log("[AdminGallery] Upload success, public URL:", publicUrl);
         imageUrl = publicUrl;
       } catch (error: any) {
-        console.error("[AdminGallery] Upload catch block:", error);
+        console.error("[AdminGallery] Upload/Compression error:", error);
         toast.error("Upload failed: " + error.message);
         setIsUploading(false);
         return;
