@@ -24,57 +24,120 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
-    try {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-      if (error) {
-        console.error("Admin check error:", error);
+  const checkAdmin = async (userId: string, userEmail?: string) => {
+    // Race against a 3-second timeout so we never hang indefinitely
+    const timeoutPromise = new Promise<boolean>((resolve) =>
+      setTimeout(() => {
+        console.warn("[useAuth] checkAdmin timed out, defaulting to false");
+        resolve(false);
+      }, 3000)
+    );
+
+    const checkPromise = async (): Promise<boolean> => {
+      try {
+        // First attempt: use the has_role RPC
+        const { data, error } = await supabase.rpc("has_role", {
+          _user_id: userId,
+          _role: "admin",
+        });
+        if (!error) {
+          console.log("[useAuth] has_role RPC result:", data);
+          return !!data;
+        }
+        console.warn("[useAuth] has_role RPC failed:", error.message, "— trying fallback");
+      } catch (err) {
+        console.warn("[useAuth] has_role RPC threw:", err);
       }
-      setIsAdmin(!!data);
-    } catch (err) {
-      console.error("Admin try-catch:", err);
-      setIsAdmin(false);
-    }
+
+      try {
+        // Fallback 1: query user_roles table directly
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (!error) {
+          console.log("[useAuth] user_roles direct query result:", data);
+          return !!data;
+        }
+        console.warn("[useAuth] user_roles query failed:", error.message);
+      } catch (err) {
+        console.warn("[useAuth] user_roles query threw:", err);
+      }
+
+      // Fallback 2: check against known admin email(s)
+      if (userEmail) {
+        const adminEmails = ["i.rajverma8423@gmail.com"];
+        const isKnownAdmin = adminEmails.includes(userEmail.toLowerCase());
+        console.log("[useAuth] Email fallback check:", userEmail, "→", isKnownAdmin);
+        return isKnownAdmin;
+      }
+
+      return false;
+    };
+
+    const isAdminResult = await Promise.race([checkPromise(), timeoutPromise]);
+    setIsAdmin(isAdminResult);
   };
 
   useEffect(() => {
     let mounted = true;
 
     const initAuth = async () => {
+      // Safety timeout: Ensure loading is cleared after 5 seconds even if Supabase hangs
+      const timeoutId = setTimeout(() => {
+        if (mounted && loading) {
+          console.warn("[useAuth] Safety timeout reached. Forcing loading state to false.");
+          setLoading(false);
+        }
+      }, 5000);
+
       try {
+        console.log("[useAuth] Initializing auth...");
         // Bypass getSession entirely to completely bypass the deadlocked browser locks
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error && error.message !== "Auth session missing!") throw error;
         
-        setUser(user);
-        if (user) {
-          await checkAdmin(user.id);
-        } else {
-          setIsAdmin(false);
+        if (mounted) {
+          setUser(user);
+          if (user) {
+            console.log("[useAuth] User found, checking roles...");
+            await checkAdmin(user.id, user.email ?? undefined);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } catch (err) {
-        console.error("Session initialize error:", err);
-        setIsAdmin(false);
+        console.error("[useAuth] Session initialize error:", err);
+        if (mounted) {
+          setIsAdmin(false);
+          setUser(null);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        clearTimeout(timeoutId);
+        if (mounted) {
+          console.log("[useAuth] Auth initialized.");
+          setLoading(false);
+        }
       }
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         if (!mounted) return;
+        console.log("[useAuth] Auth state change:", event);
         const u = session?.user ?? null;
         setUser(u);
         if (u) {
-          await checkAdmin(u.id);
+          await checkAdmin(u.id, u.email ?? undefined);
         } else {
           setIsAdmin(false);
         }
+        // Also clear loading if it's still true
+        setLoading(false);
       }
     );
 
