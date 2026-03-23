@@ -60,7 +60,6 @@ export default function AdminCourses() {
     },
     onError: (e: Error) => {
       console.error("Mutation failed:", e);
-      toast.error(e.message || "Failed to save course. Check console for details.");
     },
   });
 
@@ -127,7 +126,19 @@ export default function AdminCourses() {
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
-          <Button variant="gold" className="mt-4" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          <Button 
+            variant="gold" 
+            className="mt-4" 
+            onClick={async () => {
+              const promise = saveMutation.mutateAsync();
+              toast.promise(promise, {
+                loading: editId ? "Updating course..." : "Adding course...",
+                success: editId ? "Course updated!" : "Course added!",
+                error: (err) => `Failed to save: ${err.message}`
+              });
+            }} 
+            disabled={saveMutation.isPending}
+          >
             {saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add"} Course
           </Button>
         </div>

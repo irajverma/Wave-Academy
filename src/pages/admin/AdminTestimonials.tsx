@@ -55,29 +55,43 @@ export default function AdminTestimonials() {
       resetForm();
     },
     onError: (error: any) => {
-      toast.error(`Error saving testimonial: ${error.message}`);
+      console.error("Save migration failed:", error);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Attempting to delete testimonial with ID:", id);
       const { error } = await supabase
         .from("testimonials")
         .delete()
         .eq("id", id);
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Supabase delete error (testimonials):", error);
+        throw error;
+      }
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials-admin"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       toast.success("Testimonial deleted");
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      console.error("Delete mutation failed:", e);
+      toast.error(`Failed to delete: ${e.message}`);
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveMutation.mutate(formData);
+    const promise = saveMutation.mutateAsync(formData);
+    toast.promise(promise, {
+      loading: editingId ? "Updating testimonial..." : "Adding testimonial...",
+      success: editingId ? "Testimonial updated!" : "Testimonial added!",
+      error: (err) => `Failed to save: ${err.message}`
+    });
   };
 
   const resetForm = () => {
@@ -145,7 +159,11 @@ export default function AdminTestimonials() {
                 <label className="text-sm font-medium">Rating (1-5)</label>
                 <Input type="number" min="1" max="5" value={formData.rating} onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })} required />
               </div>
-              <Button type="submit" disabled={saveMutation.isPending} className="w-full">
+              <Button 
+                type="submit" 
+                disabled={saveMutation.isPending} 
+                className="w-full"
+              >
                 {saveMutation.isPending ? "Saving..." : "Save Testimonial"}
               </Button>
             </form>

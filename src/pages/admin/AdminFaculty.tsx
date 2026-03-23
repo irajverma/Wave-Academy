@@ -113,23 +113,35 @@ export default function AdminFaculty() {
       queryClient.invalidateQueries({ queryKey: ["faculty"] });
       resetForm();
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      console.error("Save mutation failed:", e);
+      // Let handleSubmit handle the toast for better promise flow
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Attempting to delete faculty member with ID:", id);
       const { error } = await supabase
         .from("faculty")
         .delete()
         .eq("id", id);
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Supabase delete error (faculty):", error);
+        throw error;
+      }
+      return true;
     },
     onSuccess: () => {
       toast.success("Teacher removed");
       queryClient.invalidateQueries({ queryKey: ["faculty-admin"] });
       queryClient.invalidateQueries({ queryKey: ["faculty"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      console.error("Delete mutation failed:", e);
+      toast.error(`Failed to delete: ${e.message}`);
+    },
   });
 
   const resetForm = () => {
@@ -316,7 +328,19 @@ export default function AdminFaculty() {
               <label htmlFor="is_active" className="text-sm font-medium text-foreground">Visible on website</label>
             </div>
           </div>
-          <Button variant="gold" className="mt-5 w-full sm:w-auto" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          <Button 
+            variant="gold" 
+            className="mt-5 w-full sm:w-auto" 
+            onClick={async () => {
+              const promise = saveMutation.mutateAsync();
+              toast.promise(promise, {
+                loading: editId ? "Updating teacher..." : "Adding teacher...",
+                success: editId ? "Teacher updated!" : "Teacher added!",
+                error: (err) => `Failed to save: ${err.message}`
+              });
+            }} 
+            disabled={saveMutation.isPending}
+          >
             {saveMutation.isPending ? "Saving..." : editId ? "Update Teacher" : "Add Teacher"}
           </Button>
         </div>

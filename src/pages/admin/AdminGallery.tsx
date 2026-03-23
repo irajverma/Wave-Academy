@@ -33,19 +33,19 @@ export default function AdminGallery() {
     queryKey: ["admin-gallery"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("gallery" as any)
+        .from("gallery")
         .select("*")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as unknown as GalleryItem[];
+      return data as GalleryItem[];
     },
   });
 
   const addMutation = useMutation({
     mutationFn: async (item: typeof newImage) => {
       const { data, error } = await supabase
-        .from("gallery" as any)
+        .from("gallery")
         .insert([{ ...item, is_active: true }]);
       if (error) throw error;
       return data;
@@ -137,7 +137,12 @@ export default function AdminGallery() {
       return;
     }
 
-    addMutation.mutate({ ...newImage, url: imageUrl });
+    const promise = addMutation.mutateAsync({ ...newImage, url: imageUrl });
+    toast.promise(promise, {
+      loading: "Saving to gallery...",
+      success: "Image added successfully!",
+      error: (err) => `Failed to add: ${err.message}`
+    });
   };
 
   return (
