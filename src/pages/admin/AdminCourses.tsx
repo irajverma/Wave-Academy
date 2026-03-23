@@ -65,12 +65,17 @@ export default function AdminCourses() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log(`[AdminCourses] Attempting to delete course with ID: ${id}`);
       const { error } = await supabase.from("courses").delete().eq("id", id);
-      if (error) throw error;
+      if (error) {
+        console.error("[AdminCourses] Delete error:", error);
+        throw error;
+      }
+      return true;
     },
     onSuccess: () => {
-      toast.success("Course deleted");
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      // Toast is handled by mutateAsync in the click handler
     },
     onError: (e: any) => {
       console.error("Failed to delete:", e);
@@ -161,7 +166,19 @@ export default function AdminCourses() {
                 <button onClick={() => startEdit(c)} className="p-2 rounded-lg hover:bg-muted transition-colors">
                   <Pencil className="h-4 w-4 text-muted-foreground" />
                 </button>
-                <button onClick={() => deleteMutation.mutate(c.id)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+                <button 
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to delete this course?")) {
+                      const promise = deleteMutation.mutateAsync(c.id);
+                      toast.promise(promise, {
+                        loading: "Deleting course...",
+                        success: "Course deleted!",
+                        error: (err) => `Failed to delete: ${err.message}`
+                      });
+                    }
+                  }} 
+                  className="p-2 rounded-lg hover:bg-destructive/10 transition-colors"
+                >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </button>
               </div>
