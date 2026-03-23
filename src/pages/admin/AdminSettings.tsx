@@ -13,15 +13,19 @@ import { Save, Loader2 } from "lucide-react";
 export default function AdminSettings() {
   const queryClient = useQueryClient();
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading, isError, error } = useQuery({
     queryKey: ["site-settings"],
     queryFn: async () => {
+      console.log("Fetching site settings...");
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching settings:", error);
+        throw error;
+      }
       return data;
     },
   });
@@ -50,16 +54,30 @@ export default function AdminSettings() {
 
   const updateSettings = useMutation({
     mutationFn: async (newData: typeof formData) => {
-      const payload = {
+      console.log("Saving settings with payload:", newData);
+      const payload: any = {
         ...newData,
-        id: settings?.id, // Keep the same ID if updating
+        updated_at: new Date().toISOString(),
       };
 
+      if (settings?.id) {
+        payload.id = settings.id;
+      }
+
+      console.log("Final upsert payload:", payload);
+      
+      // Perform upsert without .select() to avoid potential hangs on return
       const { error } = await supabase
         .from("site_settings")
         .upsert(payload);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase upsert error:", error);
+        throw error;
+      }
+      
+      console.log("Upsert success");
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["site-settings"] });
@@ -72,10 +90,36 @@ export default function AdminSettings() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateSettings.mutate(formData);
+    
+    const promise = updateSettings.mutateAsync(formData);
+    
+    toast.promise(promise, {
+      loading: 'Updating site settings...',
+      success: 'Settings updated successfully!',
+      error: (err) => `Failed to update: ${err.message || 'Unknown error'}`
+    });
   };
 
-  if (isLoading) return <div>Loading settings...</div>;
+  if (isLoading) return (
+    <div className="flex items-center justify-center p-12">
+      <Loader2 className="w-8 h-8 animate-spin text-gold mr-3" />
+      <span className="text-lg font-medium text-muted-foreground">Loading settings...</span>
+    </div>
+  );
+
+  if (isError) return (
+    <div className="p-8 bg-rose-50 border border-rose-200 rounded-xl text-rose-800">
+      <h2 className="text-xl font-bold mb-2">Error Loading Settings</h2>
+      <p>{(error as Error).message}</p>
+      <Button 
+        variant="outline" 
+        className="mt-4 border-rose-300 hover:bg-rose-100"
+        onClick={() => queryClient.invalidateQueries({ queryKey: ["site-settings"] })}
+      >
+        Retry
+      </Button>
+    </div>
+  );
 
   return (
     <div className="max-w-4xl space-y-6">
