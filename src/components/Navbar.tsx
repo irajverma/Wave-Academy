@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, GraduationCap, Shield, Bell } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -87,6 +88,7 @@ export const Navbar = () => {
             );
           })}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link to="/enroll">
               <Button variant="gold" size="sm">Enroll Now</Button>
             </Link>
@@ -96,14 +98,16 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden text-gold-light p-2 -mr-2"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            className="text-gold-light p-2 -mr-2"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

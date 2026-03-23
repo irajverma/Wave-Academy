@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Navbar } from "@/components/Navbar";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import HomePage from "@/pages/HomePage";
@@ -31,39 +32,41 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/courses" element={<CoursesPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/enroll" element={<EnrollPage />} />
-            <Route path="/faculty" element={<FacultyPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/results" element={<StudentResultsPage />} />
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminOverview />} />
-              <Route path="courses" element={<AdminCourses />} />
-              <Route path="enrollments" element={<AdminEnrollments />} />
-              <Route path="contacts" element={<AdminContacts />} />
-              <Route path="results" element={<AdminResults />} />
-              <Route path="settings" element={<AdminSettings />} />
-              <Route path="testimonials" element={<AdminTestimonials />} />
-              <Route path="gallery" element={<AdminGallery />} />
-              <Route path="faculty" element={<AdminFaculty />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
-          <WhatsAppButton />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme" attribute="class">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/enroll" element={<EnrollPage />} />
+              <Route path="/faculty" element={<FacultyPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/results" element={<StudentResultsPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="courses" element={<AdminCourses />} />
+                <Route path="enrollments" element={<AdminEnrollments />} />
+                <Route path="contacts" element={<AdminContacts />} />
+                <Route path="results" element={<AdminResults />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route path="testimonials" element={<AdminTestimonials />} />
+                <Route path="gallery" element={<AdminGallery />} />
+                <Route path="faculty" element={<AdminFaculty />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Footer />
+            <WhatsAppButton />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

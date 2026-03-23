@@ -57,6 +57,49 @@
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
   }
+
+  .dark {
+    --background: 222 60% 8%;
+    --foreground: 220 30% 98%;
+
+    --card: 222 50% 11%;
+    --card-foreground: 220 30% 98%;
+
+    --popover: 222 50% 11%;
+    --popover-foreground: 220 30% 98%;
+
+    --primary: 222 55% 25%;
+    --primary-foreground: 43 72% 65%;
+
+    --secondary: 222 40% 15%;
+    --secondary-foreground: 220 30% 98%;
+
+    --muted: 222 35% 15%;
+    --muted-foreground: 220 15% 70%;
+
+    --accent: 43 72% 55%;
+    --accent-foreground: 222 60% 8%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 40% 20%;
+    --input: 222 40% 20%;
+    --ring: 43 72% 55%;
+
+    --navy: 222 55% 15%;
+    --navy-light: 222 45% 22%;
+    --navy-dark: 222 70% 5%;
+    
+    --sidebar-background: 222 65% 6%;
+    --sidebar-foreground: 220 20% 90%;
+    --sidebar-primary: 43 72% 55%;
+    --sidebar-primary-foreground: 222 60% 6%;
+    --sidebar-accent: 222 55% 12%;
+    --sidebar-accent-foreground: 220 20% 98%;
+    --sidebar-border: 222 45% 18%;
+    --sidebar-ring: 43 72% 55%;
+  }
 }
 
 @layer base {
