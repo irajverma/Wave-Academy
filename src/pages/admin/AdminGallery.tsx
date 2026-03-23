@@ -68,7 +68,7 @@ export default function AdminGallery() {
   const toggleMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase
-        .from("gallery" as any)
+        .from("gallery")
         .update({ is_active })
         .eq("id", id);
       if (error) throw error;
@@ -76,22 +76,27 @@ export default function AdminGallery() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-gallery"] });
       queryClient.invalidateQueries({ queryKey: ["gallery"] });
-      toast.success("Image status updated");
+      // Let handleSubmit handle the toast for better promise flow
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log(`[AdminGallery] Attempting to delete image with ID: ${id}`);
       const { error } = await supabase
-        .from("gallery" as any)
+        .from("gallery")
         .delete()
         .eq("id", id);
-      if (error) throw error;
+      if (error) {
+        console.error("[AdminGallery] Delete error:", error);
+        throw error;
+      }
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-gallery"] });
       queryClient.invalidateQueries({ queryKey: ["gallery"] });
-      toast.success("Image removed from gallery");
+      // Let handling button do the toast
     }
   });
 
@@ -319,7 +324,14 @@ export default function AdminGallery() {
             <div className="flex items-center justify-between pt-4 border-t border-border/50">
               <div className="flex gap-2">
                 <button
-                  onClick={() => toggleMutation.mutate({ id: img.id, is_active: !img.is_active })}
+                  onClick={async () => {
+                    const promise = toggleMutation.mutateAsync({ id: img.id, is_active: !img.is_active });
+                    toast.promise(promise, {
+                      loading: "Updating status...",
+                      success: "Visibility updated!",
+                      error: (err) => `Failed to update: ${err.message}`
+                    });
+                  }}
                   className={`p-2 rounded-lg transition-colors ${
                     img.is_active ? "text-emerald-500 hover:bg-emerald-50" : "text-rose-500 hover:bg-rose-50"
                   }`}
@@ -336,9 +348,14 @@ export default function AdminGallery() {
                 </button>
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm("Remove this image from gallery?")) {
-                    deleteMutation.mutate(img.id);
+                    const promise = deleteMutation.mutateAsync(img.id);
+                    toast.promise(promise, {
+                      loading: "Deleting image...",
+                      success: "Image removed!",
+                      error: (err) => `Failed to delete: ${err.message}`
+                    });
                   }
                 }}
                 className="p-2 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
