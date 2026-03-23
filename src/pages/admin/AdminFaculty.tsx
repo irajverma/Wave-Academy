@@ -94,18 +94,21 @@ export default function AdminFaculty() {
         order: Number(form.order),
       };
       
+      console.log(`[AdminFaculty] Starting ${editId ? "update" : "insert"} for:`, payload);
+      let result;
       if (editId) {
-        const { error } = await supabase
+        result = await supabase
           .from("faculty")
           .update(payload)
           .eq("id", editId);
-        if (error) throw error;
       } else {
-        const { error } = await supabase
+        result = await supabase
           .from("faculty")
           .insert([payload]);
-        if (error) throw error;
       }
+      console.log("[AdminFaculty] Supabase result:", result);
+      if (result.error) throw result.error;
+      return true;
     },
     onSuccess: () => {
       toast.success(editId ? "Teacher updated!" : "Teacher added!");

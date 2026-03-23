@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ type GalleryItem = {
 
 export default function AdminGallery() {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -55,6 +56,8 @@ export default function AdminGallery() {
       queryClient.invalidateQueries({ queryKey: ["gallery"] });
       toast.success("Image added to gallery");
       setNewImage({ url: "", caption: "", category: "achievement" });
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setIsAdding(false);
     },
     onError: (error) => {
@@ -109,21 +112,28 @@ export default function AdminGallery() {
       setIsUploading(true);
       try {
         const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         const filePath = `${fileName}`;
-
+        
+        console.log(`[AdminGallery] Uploading ${selectedFile.name} as ${filePath}...`);
+        console.log("[AdminGallery] Starting file upload to 'gallery' bucket:", filePath);
         const { error: uploadError, data } = await supabase.storage
           .from('gallery')
           .upload(filePath, selectedFile);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("[AdminGallery] Storage upload error:", uploadError);
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('gallery')
           .getPublicUrl(filePath);
 
+        console.log("[AdminGallery] Upload success, public URL:", publicUrl);
         imageUrl = publicUrl;
       } catch (error: any) {
+        console.error("[AdminGallery] Upload catch block:", error);
         toast.error("Upload failed: " + error.message);
         setIsUploading(false);
         return;
@@ -171,6 +181,7 @@ export default function AdminGallery() {
                   <div className="relative flex-1">
                     <Upload className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}

@@ -34,18 +34,25 @@ export default function AdminTestimonials() {
 
   const saveMutation = useMutation({
     mutationFn: async (newData: any) => {
+      console.log(`[AdminTestimonials] Starting ${editingId ? "update" : "insert"} for:`, newData);
+      let result;
       if (editingId) {
-        const { error } = await supabase
+        result = await supabase
           .from("testimonials")
           .update(newData)
           .eq("id", editingId);
-        if (error) throw error;
       } else {
-        const { error } = await supabase
+        result = await supabase
           .from("testimonials")
           .insert([newData]);
-        if (error) throw error;
       }
+      console.log("[AdminTestimonials] Supabase result:", result);
+      
+      if (result.error) {
+        console.error("Supabase error detail:", result.error);
+        throw result.error;
+      }
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials-admin"] });
