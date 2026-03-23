@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit, Sparkles } from "lucide-react";
+import { Plus, Trash2, Edit, Sparkles, Loader2 } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { seedTestimonials } from "@/scripts/seedTestimonials";
 
@@ -57,12 +57,12 @@ export default function AdminTestimonials() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials-admin"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
-      toast.success(`Testimonial ${editingId ? "updated" : "added"} successfully`);
-      setIsOpen(false);
-      resetForm();
+    },
+    onSettled: () => {
+      console.log("[AdminTestimonials] Mutation settled.");
     },
     onError: (error: any) => {
-      console.error("Save migration failed:", error);
+      console.error("[AdminTestimonials] Save mutation error details:", error);
     },
   });
 
@@ -91,13 +91,30 @@ export default function AdminTestimonials() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const promise = saveMutation.mutateAsync(formData);
-    toast.promise(promise, {
+    if (!formData.name.trim() || !formData.text.trim()) {
+      toast.error("Please fill in Student Name and Testimonial Text");
+      return;
+    }
+
+    const savePromise = async () => {
+      try {
+        console.log("[AdminTestimonials] Executing savePromise...");
+        await saveMutation.mutateAsync(formData);
+        console.log("[AdminTestimonials] Mutation successful, closing dialog.");
+        setIsOpen(false);
+        resetForm();
+      } catch (err: any) {
+        console.error("[AdminTestimonials] Caught error in savePromise:", err);
+        throw err;
+      }
+    };
+
+    toast.promise(savePromise(), {
       loading: editingId ? "Updating testimonial..." : "Adding testimonial...",
       success: editingId ? "Testimonial updated!" : "Testimonial added!",
-      error: (err) => `Failed to save: ${err.message}`
+      error: (err) => `Failed to save: ${err.message || "Unknown error"}`
     });
   };
 
@@ -171,7 +188,12 @@ export default function AdminTestimonials() {
                 disabled={saveMutation.isPending} 
                 className="w-full"
               >
-                {saveMutation.isPending ? "Saving..." : "Save Testimonial"}
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : "Save Testimonial"}
               </Button>
             </form>
           </DialogContent>

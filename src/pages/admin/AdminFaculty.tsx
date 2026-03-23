@@ -111,14 +111,14 @@ export default function AdminFaculty() {
       return true;
     },
     onSuccess: () => {
-      toast.success(editId ? "Teacher updated!" : "Teacher added!");
       queryClient.invalidateQueries({ queryKey: ["faculty-admin"] });
       queryClient.invalidateQueries({ queryKey: ["faculty"] });
-      resetForm();
+    },
+    onSettled: () => {
+      console.log("[AdminFaculty] Mutation settled.");
     },
     onError: (e: any) => {
-      console.error("Save mutation failed:", e);
-      // Let handleSubmit handle the toast for better promise flow
+      console.error("[AdminFaculty] Save mutation error details:", e);
     },
   });
 
@@ -335,16 +335,37 @@ export default function AdminFaculty() {
             variant="gold" 
             className="mt-5 w-full sm:w-auto" 
             onClick={async () => {
-              const promise = saveMutation.mutateAsync();
-              toast.promise(promise, {
+              if (!form.name.trim() || !form.subject.trim() || !form.qualification.trim()) {
+                toast.error("Please fill in all required fields (Name, Subject, Qualification)");
+                return;
+              }
+
+              const savePromise = async () => {
+                try {
+                  console.log("[AdminFaculty] Executing savePromise...");
+                  await saveMutation.mutateAsync();
+                  console.log("[AdminFaculty] Mutation successful, resetting form.");
+                  resetForm();
+                } catch (err: any) {
+                  console.error("[AdminFaculty] Caught error in savePromise:", err);
+                  throw err;
+                }
+              };
+
+              toast.promise(savePromise(), {
                 loading: editId ? "Updating teacher..." : "Adding teacher...",
-                success: editId ? "Teacher updated!" : "Teacher added!",
-                error: (err) => `Failed to save: ${err.message}`
+                success: (data) => editId ? "Teacher updated!" : "Teacher added!",
+                error: (err) => `Failed to save: ${err.message || "Unknown error"}`
               });
             }} 
             disabled={saveMutation.isPending}
           >
-            {saveMutation.isPending ? "Saving..." : editId ? "Update Teacher" : "Add Teacher"}
+            {saveMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : editId ? "Update Teacher" : "Add Teacher"}
           </Button>
         </div>
       )}

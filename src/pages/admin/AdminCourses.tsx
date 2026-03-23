@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Plus, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Pencil, X, Loader2 } from "lucide-react";
 
 export default function AdminCourses() {
   const queryClient = useQueryClient();
@@ -54,12 +54,14 @@ export default function AdminCourses() {
       }
     },
     onSuccess: () => {
-      toast.success(editId ? "Course updated" : "Course added");
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-      resetForm();
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+    },
+    onSettled: () => {
+      console.log("[AdminCourses] Mutation settled.");
     },
     onError: (e: Error) => {
-      console.error("Mutation failed:", e);
+      console.error("[AdminCourses] Mutation failed:", e);
     },
   });
 
@@ -135,16 +137,37 @@ export default function AdminCourses() {
             variant="gold" 
             className="mt-4" 
             onClick={async () => {
-              const promise = saveMutation.mutateAsync();
-              toast.promise(promise, {
+              if (!form.title.trim() || !form.category.trim()) {
+                toast.error("Please fill in Title and Category");
+                return;
+              }
+
+              const savePromise = async () => {
+                try {
+                  console.log("[AdminCourses] Executing savePromise...");
+                  await saveMutation.mutateAsync();
+                  console.log("[AdminCourses] Mutation successful, resetting form.");
+                  resetForm();
+                } catch (err: any) {
+                  console.error("[AdminCourses] Caught error in savePromise:", err);
+                  throw err;
+                }
+              };
+
+              toast.promise(savePromise(), {
                 loading: editId ? "Updating course..." : "Adding course...",
                 success: editId ? "Course updated!" : "Course added!",
-                error: (err) => `Failed to save: ${err.message}`
+                error: (err) => `Failed to save: ${err.message || "Unknown error"}`
               });
             }} 
             disabled={saveMutation.isPending}
           >
-            {saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add"} Course
+            {saveMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : editId ? "Update" : "Add"} Course
           </Button>
         </div>
       )}
