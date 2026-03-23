@@ -94,7 +94,7 @@ export default function AdminResults() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    toast.info("Analyzing Excel file...");
+    const loadingToast = toast.info("Analyzing Excel file...", { duration: Infinity });
     
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -149,6 +149,7 @@ export default function AdminResults() {
         console.log("Bulk Upload Payload Preview:", payloads);
 
         if (payloads.length === 0) {
+          toast.dismiss(loadingToast);
           toast.error("No valid student names found in the Excel file!");
           return;
         }
@@ -156,11 +157,13 @@ export default function AdminResults() {
         const { error: insertError } = await supabase.from("test_results").insert(payloads);
         if (insertError) throw insertError;
         
+        toast.dismiss(loadingToast);
         toast.success(`Successfully imported ${payloads.length} test results!`);
         queryClient.invalidateQueries({ queryKey: ["admin-results"] });
         
       } catch (err: any) {
         console.error("Upload error:", err);
+        toast.dismiss(loadingToast);
         toast.error(err.message || "Failed to process Excel file.");
       } finally {
         if (fileInputRef.current) fileInputRef.current.value = "";

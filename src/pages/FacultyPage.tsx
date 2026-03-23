@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, query as fsQuery, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { GraduationCap, Clock, Award, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,11 +8,14 @@ export default function FacultyPage() {
   const { data: faculty, isLoading, isError } = useQuery({
     queryKey: ["faculty-page"],
     queryFn: async () => {
-      const q = fsQuery(collection(db, "faculty"), orderBy("order", "asc"));
-      const snap = await getDocs(q);
-      return snap.docs
-        .map(d => ({ id: d.id, ...d.data() as any }))
-        .filter(f => f.is_active !== false);
+      const { data, error } = await supabase
+        .from("faculty")
+        .select("*")
+        .eq("is_active", true)
+        .order("order", { ascending: true });
+      
+      if (error) throw error;
+      return data;
     },
   });
 

@@ -22,7 +22,7 @@ export default function GalleryPage() {
     queryKey: ["gallery-page"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("gallery" as any)
+        .from("gallery")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
@@ -31,7 +31,7 @@ export default function GalleryPage() {
         console.error("Gallery fetch error:", error);
         return [];
       }
-      return data as unknown as GalleryItem[];
+      return data;
     },
   });
 

@@ -113,6 +113,75 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery: {
+        Row: {
+          id: string
+          url: string
+          caption: string | null
+          category: "achievement" | "coaching" | null
+          is_active: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          url: string
+          caption?: string | null
+          category?: "achievement" | "coaching" | null
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          url?: string
+          caption?: string | null
+          category?: "achievement" | "coaching" | null
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      faculty: {
+        Row: {
+          id: string
+          name: string
+          subject: string
+          qualification: string | null
+          experience: string | null
+          bio: string | null
+          photo_url: string | null
+          achievements: string[] | null
+          order: number | null
+          is_active: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          subject: string
+          qualification?: string | null
+          experience?: string | null
+          bio?: string | null
+          photo_url?: string | null
+          achievements?: string[] | null
+          order?: number | null
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          subject?: string
+          qualification?: string | null
+          experience?: string | null
+          bio?: string | null
+          photo_url?: string | null
+          achievements?: string[] | null
+          order?: number | null
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

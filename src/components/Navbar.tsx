@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, GraduationCap, Shield } from "lucide-react";
+import { Menu, X, GraduationCap, Shield, Bell } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -15,16 +16,41 @@ const navLinks = [
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { data: settings } = useSiteSettings();
+  const [bannerHeight, setBannerHeight] = useState(0);
+
+  useEffect(() => {
+    const banner = document.getElementById("announcement-banner");
+    if (banner) {
+      setBannerHeight(banner.offsetHeight);
+    } else {
+      setBannerHeight(0);
+    }
+  }, [settings?.announcement_active, settings?.announcement_text]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-navy/95 backdrop-blur-md border-b border-navy-light/30">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link to="/" className="flex items-center gap-2 group">
-          <GraduationCap className="h-8 w-8 text-gold transition-transform duration-200 group-hover:scale-110" />
-          <span className="font-display text-xl font-bold text-gold-light tracking-tight">
-            Wave Academy
-          </span>
-        </Link>
+    <>
+      {settings?.announcement_active && settings?.announcement_text && (
+        <div 
+          id="announcement-banner"
+          className="fixed top-0 left-0 right-0 z-[60] bg-gold text-navy py-2 px-4 text-center font-medium text-sm flex items-center justify-center gap-2 animate-fade-in"
+        >
+          <Bell className="h-4 w-4 animate-bounce" />
+          <span>{settings.announcement_text}</span>
+        </div>
+      )}
+      
+      <nav 
+        className="fixed left-0 right-0 z-50 bg-navy/95 backdrop-blur-md border-b border-navy-light/30 transition-all duration-300"
+        style={{ top: settings?.announcement_active ? `${bannerHeight}px` : '0px' }}
+      >
+        <div className="container mx-auto flex items-center justify-between h-16 px-4">
+          <Link to="/" className="flex items-center gap-2 group">
+            <GraduationCap className="h-8 w-8 text-gold transition-transform duration-200 group-hover:scale-110" />
+            <span className="font-display text-xl font-bold text-gold-light tracking-tight">
+              Wave Academy
+            </span>
+          </Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
@@ -133,6 +159,7 @@ export const Navbar = () => {
           </Link>
         </div>
       </div>
-    </nav>
+      </nav>
+    </>
   );
 };

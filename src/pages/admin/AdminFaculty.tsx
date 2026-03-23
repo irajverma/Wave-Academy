@@ -1,12 +1,14 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, query as fsQuery, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, X, GraduationCap, Sparkles, ImagePlus, Loader2 } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type FacultyMember = Database["public"]["Tables"]["faculty"]["Row"];
 
 const DEMO_FACULTY = [
   {
@@ -19,7 +21,6 @@ const DEMO_FACULTY = [
     photo_url: "/satendra-singh.jpg",
     is_active: true,
     order: 1,
-    created_at: new Date().toISOString(),
   },
   {
     name: "Dr. Priya Menon",
@@ -31,7 +32,6 @@ const DEMO_FACULTY = [
     photo_url: "",
     is_active: true,
     order: 2,
-    created_at: new Date().toISOString(),
   },
   {
     name: "Mr. Anil Verma",
@@ -43,7 +43,6 @@ const DEMO_FACULTY = [
     photo_url: "",
     is_active: true,
     order: 3,
-    created_at: new Date().toISOString(),
   },
   {
     name: "Ms. Kavita Joshi",
@@ -55,7 +54,6 @@ const DEMO_FACULTY = [
     photo_url: "",
     is_active: true,
     order: 4,
-    created_at: new Date().toISOString(),
   },
 ];
 
@@ -72,15 +70,19 @@ export default function AdminFaculty() {
   const { data: faculty, isLoading } = useQuery({
     queryKey: ["faculty-admin"],
     queryFn: async () => {
-      const q = fsQuery(collection(db, "faculty"), orderBy("order", "asc"));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+      const { data, error } = await supabase
+        .from("faculty")
+        .select("*")
+        .order("order", { ascending: true });
+      
+      if (error) throw error;
+      return data;
     },
   });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const payload = {
+      const payload: any = {
         name: form.name,
         subject: form.subject,
         qualification: form.qualification,
@@ -91,10 +93,18 @@ export default function AdminFaculty() {
         is_active: form.is_active,
         order: Number(form.order),
       };
+      
       if (editId) {
-        await setDoc(doc(db, "faculty", editId), payload, { merge: true });
+        const { error } = await supabase
+          .from("faculty")
+          .update(payload)
+          .eq("id", editId);
+        if (error) throw error;
       } else {
-        await addDoc(collection(db, "faculty"), { ...payload, created_at: new Date().toISOString() });
+        const { error } = await supabase
+          .from("faculty")
+          .insert([payload]);
+        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -108,13 +118,18 @@ export default function AdminFaculty() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await deleteDoc(doc(db, "faculty", id));
+      const { error } = await supabase
+        .from("faculty")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Teacher removed");
       queryClient.invalidateQueries({ queryKey: ["faculty-admin"] });
       queryClient.invalidateQueries({ queryKey: ["faculty"] });
     },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const resetForm = () => {
@@ -181,10 +196,13 @@ export default function AdminFaculty() {
 
   const seedDemoFaculty = async () => {
     try {
-      for (const f of DEMO_FACULTY) {
-        await addDoc(collection(db, "faculty"), f);
-      }
-      toast.success("4 demo teachers added!");
+      const { error } = await supabase
+        .from("faculty")
+        .insert(DEMO_FACULTY);
+      
+      if (error) throw error;
+
+      toast.success("Demo faculty added!");
       queryClient.invalidateQueries({ queryKey: ["faculty-admin"] });
       queryClient.invalidateQueries({ queryKey: ["faculty"] });
     } catch (e: any) {

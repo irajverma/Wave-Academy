@@ -5,8 +5,10 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Phone, Mail, MapPin, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function ContactPage() {
+  const { data: settings } = useSiteSettings();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
 
@@ -95,7 +97,9 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <div className="text-sm font-medium">Address</div>
-                        <div className="text-sm text-muted-foreground">123 Education Lane, Knowledge City, India</div>
+                        <div className="text-sm text-muted-foreground">
+                          {settings?.address || "123 Education Lane, Knowledge City, India"}
+                        </div>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
@@ -104,7 +108,9 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <div className="text-sm font-medium">Phone</div>
-                        <div className="text-sm text-muted-foreground">+91 88088 59048</div>
+                        <div className="text-sm text-muted-foreground">
+                          {settings?.contact_phone || "+91 88088 59048"}
+                        </div>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
@@ -113,7 +119,9 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <div className="text-sm font-medium">Email</div>
-                        <div className="text-sm text-muted-foreground">info@waveacademy.in</div>
+                        <div className="text-sm text-muted-foreground">
+                          {settings?.contact_email || "info@waveacademy.in"}
+                        </div>
                       </div>
                     </li>
                   </ul>

@@ -1,17 +1,8 @@
 import { MessageCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, query as fsQuery, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const WhatsAppButton = () => {
-  const { data: settings } = useQuery({
-    queryKey: ["site-settings"],
-    queryFn: async () => {
-      const q = fsQuery(collection(db, "site_settings"), limit(1));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.empty ? null : querySnapshot.docs[0].data();
-    },
-  });
+  const { data: settings } = useSiteSettings();
 
   const whatsappNumber = settings?.whatsapp_number || "918808859048";
 

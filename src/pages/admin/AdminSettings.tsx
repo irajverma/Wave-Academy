@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, getDocs, doc, setDoc, query as fsQuery, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 
 export default function AdminSettings() {
   const queryClient = useQueryClient();
@@ -17,11 +16,13 @@ export default function AdminSettings() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["site-settings"],
     queryFn: async () => {
-      const q = fsQuery(collection(db, "site_settings"), limit(1));
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) return null;
-      const data = querySnapshot.docs[0].data() as any;
-      return { id: querySnapshot.docs[0].id, ...data };
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -49,17 +50,22 @@ export default function AdminSettings() {
 
   const updateSettings = useMutation({
     mutationFn: async (newData: typeof formData) => {
-      if (settings?.id) {
-        await setDoc(doc(db, "site_settings", settings.id), newData, { merge: true });
-      } else {
-        await setDoc(doc(collection(db, "site_settings")), newData);
-      }
+      const payload = {
+        ...newData,
+        id: settings?.id, // Keep the same ID if updating
+      };
+
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert(payload);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["site-settings"] });
       toast.success("Settings updated successfully");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to update settings: ${error.message}`);
     },
   });

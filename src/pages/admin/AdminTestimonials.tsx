@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, getDocs, doc, setDoc, deleteDoc, query as fsQuery, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit, Sparkles } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 import { seedTestimonials } from "@/scripts/seedTestimonials";
+
+type Testimonial = Database["public"]["Tables"]["testimonials"]["Row"];
 
 export default function AdminTestimonials() {
   const queryClient = useQueryClient();
@@ -20,19 +22,29 @@ export default function AdminTestimonials() {
   const { data: testimonials, isLoading } = useQuery({
     queryKey: ["testimonials-admin"],
     queryFn: async () => {
-      const q = fsQuery(collection(db, "testimonials"), orderBy("created_at", "desc"));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
   });
 
   const saveMutation = useMutation({
     mutationFn: async (newData: any) => {
       if (editingId) {
-        await setDoc(doc(db, "testimonials", editingId), newData, { merge: true });
+        const { error } = await supabase
+          .from("testimonials")
+          .update(newData)
+          .eq("id", editingId);
+        if (error) throw error;
       } else {
-        newData.created_at = new Date().toISOString();
-        await setDoc(doc(collection(db, "testimonials")), newData);
+        const { error } = await supabase
+          .from("testimonials")
+          .insert([newData]);
+        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -42,20 +54,25 @@ export default function AdminTestimonials() {
       setIsOpen(false);
       resetForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Error saving testimonial: ${error.message}`);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await deleteDoc(doc(db, "testimonials", id));
+      const { error } = await supabase
+        .from("testimonials")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials-admin"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       toast.success("Testimonial deleted");
     },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const handleSubmit = (e: React.FormEvent) => {

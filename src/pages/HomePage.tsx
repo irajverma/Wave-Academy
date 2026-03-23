@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, query as fsQuery, limit, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   BookOpen, Users, Trophy, Target, Star, ChevronRight, ChevronLeft,
   GraduationCap, Clock, Shield, TrendingUp, Phone, Mail, MapPin, 
@@ -67,7 +66,7 @@ export default function HomePage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
-  const { data: banners } = useQuery({
+  const { data: homeBanners } = useQuery({
     queryKey: ["site-banners"],
     queryFn: async () => {
       const { data, error } = await supabase.from("site_banners").select("*").eq("is_active", true).order("created_at", { ascending: false });
@@ -77,42 +76,40 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    if (!banners || banners.length <= 1) return;
+    if (!homeBanners || homeBanners.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % banners.length);
+      setCurrentBanner((prev) => (prev + 1) % homeBanners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [banners]);
+  }, [homeBanners]);
 
-  const { data: settings } = useQuery({
-    queryKey: ["site-settings"],
-    queryFn: async () => {
-      const q = fsQuery(collection(db, "site_settings"), limit(1));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.empty ? null : querySnapshot.docs[0].data();
-    },
-  });
+  const { data: settings } = useSiteSettings();
 
   const { data: dynamicTestimonials } = useQuery({
     queryKey: ["testimonials"],
     queryFn: async () => {
-      // Fetch all and filter client-side to avoid requiring Firestore composite index
-      const q = fsQuery(collection(db, "testimonials"), orderBy("created_at", "desc"));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() as any }))
-        .filter(t => t.is_active !== false); // show all unless explicitly hidden
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
   });
 
   const { data: facultyList } = useQuery({
     queryKey: ["faculty"],
     queryFn: async () => {
-      const q = fsQuery(collection(db, "faculty"), orderBy("order", "asc"));
-      const snap = await getDocs(q);
-      return snap.docs
-        .map(d => ({ id: d.id, ...d.data() as any }))
-        .filter(f => f.is_active !== false);
+      const { data, error } = await supabase
+        .from("faculty")
+        .select("*")
+        .eq("is_active", true)
+        .order("order", { ascending: true });
+      
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -120,11 +117,6 @@ export default function HomePage() {
 
   return (
     <div className="overflow-hidden">
-      {settings?.announcement_active && settings?.announcement_text && (
-        <div className="bg-gold text-navy text-center py-3 px-4 text-sm font-semibold animate-fade-in relative z-50">
-          {settings.announcement_text}
-        </div>
-      )}
 
       {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center bg-navy overflow-hidden">
