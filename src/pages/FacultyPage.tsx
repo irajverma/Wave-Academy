@@ -3,8 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { GraduationCap, Clock, Award, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { FacultyDialog } from "@/components/FacultyDialog";
 
 export default function FacultyPage() {
+  const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
   const { data: faculty, isLoading, isError } = useQuery({
     queryKey: ["faculty-page"],
     queryFn: async () => {
@@ -87,7 +91,7 @@ export default function FacultyPage() {
                         <Award className="h-4 w-4" /> {f.qualification}
                       </p>
                       
-                      <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1">
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1 line-clamp-4">
                         {f.bio}
                       </p>
 
@@ -95,20 +99,20 @@ export default function FacultyPage() {
                         {f.experience && (
                           <div className="flex items-center gap-2 text-sm text-foreground font-medium">
                             <Clock className="h-4 w-4 text-gold" />
-                            <span>{f.experience} Teaching Experience</span>
+                            <span>{f.experience} Experience</span>
                           </div>
                         )}
                         
-                        {f.achievements?.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {f.achievements.slice(0, 3).map((a: string, idx: number) => (
-                              <div key={idx} className="flex items-center gap-1.5 text-xs bg-gold/5 text-gold px-3 py-1.5 rounded-lg border border-gold/10">
-                                <Star className="h-3 w-3 fill-gold" />
-                                {a}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedFaculty(f);
+                            setIsFacultyOpen(true);
+                          }}
+                          className="w-full mt-4 bg-navy-light/50 hover:bg-navy-light text-gold text-xs font-bold py-3 rounded-xl border border-gold/20 transition-all uppercase tracking-widest"
+                        >
+                          View Full Profile
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -116,6 +120,12 @@ export default function FacultyPage() {
               ))
             )}
           </div>
+          
+          <FacultyDialog 
+            faculty={selectedFaculty} 
+            open={isFacultyOpen} 
+            onOpenChange={setIsFacultyOpen} 
+          />
         </div>
       </section>
 

@@ -12,6 +12,8 @@ import {
   Image as ImageIcon, Boxes
 } from "lucide-react";
 import { Gallery } from "@/components/Gallery";
+import { FacultyDialog } from "@/components/FacultyDialog";
+import { TestimonialDialog } from "@/components/TestimonialDialog";
 import {
   Carousel,
   CarouselContent,
@@ -59,6 +61,10 @@ const testimonials = [
 
 export default function HomePage() {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
+  const [selectedTestimonial, setSelectedTestimonial] = useState<any>(null);
+  const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
@@ -267,7 +273,18 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {facultyList.map((f: any, i: number) => (
                 <ScrollReveal key={f.id} delay={i * 100}>
-                  <div className="group bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-gold/30 transition-all duration-300 h-full">
+                  <div 
+                    className="group bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-gold/30 transition-all duration-300 h-full cursor-pointer relative"
+                    onClick={() => {
+                      setSelectedFaculty(f);
+                      setIsFacultyOpen(true);
+                    }}
+                  >
+                    {/* View Profile Indicator */}
+                    <div className="absolute top-4 right-4 text-[10px] font-bold text-gold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                      View Profile
+                    </div>
+
                     {/* Avatar */}
                     {f.photo_url ? (
                       <img src={f.photo_url} alt={f.name} className="w-24 h-24 rounded-full object-cover border-4 border-gold/20 group-hover:border-gold/50 transition-colors mb-4 shadow-md" />
@@ -293,14 +310,14 @@ export default function HomePage() {
 
                     {/* Bio */}
                     {f.bio && (
-                      <p className="text-xs text-muted-foreground mt-3 leading-relaxed text-pretty">{f.bio}</p>
+                      <p className="text-xs text-muted-foreground mt-3 leading-relaxed text-pretty line-clamp-3">{f.bio}</p>
                     )}
 
                     {/* Achievement pills */}
                     {f.achievements?.length > 0 && (
                       <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-                        {f.achievements.slice(0, 3).map((a: string, j: number) => (
-                          <span key={j} className="text-xs bg-gold/10 text-gold px-2.5 py-0.5 rounded-full border border-gold/20 font-medium">
+                        {f.achievements.slice(0, 2).map((a: string, j: number) => (
+                          <span key={j} className="text-[10px] bg-gold/10 text-gold px-2 py-0.5 rounded-full border border-gold/20 font-medium">
                             {a}
                           </span>
                         ))}
@@ -310,6 +327,12 @@ export default function HomePage() {
                 </ScrollReveal>
               ))}
             </div>
+
+            <FacultyDialog 
+              faculty={selectedFaculty} 
+              open={isFacultyOpen} 
+              onOpenChange={setIsFacultyOpen} 
+            />
           </div>
         </section>
       )}
@@ -348,13 +371,24 @@ export default function HomePage() {
                 {displayTestimonials.map((t, i) => (
                   <CarouselItem key={i} className="pl-4 md:pl-8 md:basis-1/2 lg:basis-1/3">
                     <ScrollReveal delay={i * 120}>
-                      <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 min-h-[280px] flex flex-col">
-                        <div className="flex gap-1 mb-4">
-                          {Array.from({ length: t.rating || 5 }).map((_, j) => (
-                            <Star key={j} className="h-4 w-4 fill-gold text-gold" />
-                          ))}
+                      <div 
+                        className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 min-h-[280px] flex flex-col cursor-pointer hover:border-gold/30 hover:bg-navy-light/70 transition-all duration-300 group"
+                        onClick={() => {
+                          setSelectedTestimonial(t);
+                          setIsTestimonialOpen(true);
+                        }}
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex gap-1">
+                            {Array.from({ length: t.rating || 5 }).map((_, j) => (
+                              <Star key={j} className="h-4 w-4 fill-gold text-gold" />
+                            ))}
+                          </div>
+                          <div className="text-[10px] font-bold text-gold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                            Read Full
+                          </div>
                         </div>
-                        <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty overflow-hidden">"{t.text}"</p>
+                        <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty overflow-hidden line-clamp-4 italic">"{t.text}"</p>
                         <div className="mt-6 pt-4 border-t border-navy-light/30">
                           <div className="font-semibold text-gold-light text-sm line-clamp-1">{t.name}</div>
                           <div className="text-xs text-gold-muted mt-0.5 line-clamp-1">{t.role}</div>
@@ -367,6 +401,12 @@ export default function HomePage() {
               <CarouselPrevious className="hidden md:flex -left-12 bg-navy border-gold/30 text-gold hover:bg-gold hover:text-navy transition-colors items-center justify-center p-0" />
               <CarouselNext className="hidden md:flex -right-12 bg-navy border-gold/30 text-gold hover:bg-gold hover:text-navy transition-colors items-center justify-center p-0" />
             </Carousel>
+
+            <TestimonialDialog 
+              testimonial={selectedTestimonial} 
+              open={isTestimonialOpen} 
+              onOpenChange={setIsTestimonialOpen} 
+            />
           </div>
         </div>
       </section>
