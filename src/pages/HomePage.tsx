@@ -293,7 +293,7 @@ export default function HomePage() {
 
                     {/* Bio */}
                     {f.bio && (
-                      <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-3 text-pretty">{f.bio}</p>
+                      <p className="text-xs text-muted-foreground mt-3 leading-relaxed text-pretty">{f.bio}</p>
                     )}
 
                     {/* Achievement pills */}
@@ -348,13 +348,13 @@ export default function HomePage() {
                 {displayTestimonials.map((t, i) => (
                   <CarouselItem key={i} className="pl-4 md:pl-8 md:basis-1/2 lg:basis-1/3">
                     <ScrollReveal delay={i * 120}>
-                      <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 h-[280px] flex flex-col">
+                      <div className="p-8 rounded-xl bg-navy-light/50 border border-navy-light/30 min-h-[280px] flex flex-col">
                         <div className="flex gap-1 mb-4">
                           {Array.from({ length: t.rating || 5 }).map((_, j) => (
                             <Star key={j} className="h-4 w-4 fill-gold text-gold" />
                           ))}
                         </div>
-                        <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty overflow-hidden text-ellipsis line-clamp-4">"{t.text}"</p>
+                        <p className="text-gold-muted text-sm leading-relaxed flex-1 text-pretty overflow-hidden">"{t.text}"</p>
                         <div className="mt-6 pt-4 border-t border-navy-light/30">
                           <div className="font-semibold text-gold-light text-sm line-clamp-1">{t.name}</div>
                           <div className="text-xs text-gold-muted mt-0.5 line-clamp-1">{t.role}</div>

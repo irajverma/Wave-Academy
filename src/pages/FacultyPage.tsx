@@ -87,7 +87,7 @@ export default function FacultyPage() {
                         <Award className="h-4 w-4" /> {f.qualification}
                       </p>
                       
-                      <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1 line-clamp-4">
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1">
                         {f.bio}
                       </p>
 
