@@ -150,6 +150,41 @@ export default function GalleryPage() {
         </div>
       </section>
 
+      {/* Lightbox */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-navy/98 backdrop-blur-md flex items-center justify-center p-4 sm:p-12 animate-fade-in"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button 
+            className="absolute top-8 right-8 text-gold-muted hover:text-gold hover:rotate-90 transition-all duration-300 p-2 z-10"
+            onClick={() => setSelectedImage(null)}
+          >
+            <X className="h-10 w-10" />
+          </button>
+          
+          <div className="relative max-w-6xl w-full max-h-full flex flex-col items-center">
+            <div className="relative group/modal overflow-hidden rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10">
+              <img
+                src={selectedImage.url}
+                alt={selectedImage.caption || "Gallery detail"}
+                className="max-w-full max-h-[75vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            {selectedImage.caption && (
+              <p className="text-gold-light mt-8 text-center text-xl font-display font-bold px-4 max-w-3xl text-balance">
+                {selectedImage.caption}
+              </p>
+            )}
+            <div className="mt-4 flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-bold uppercase tracking-widest">
+              <Maximize2 className="h-3 w-3" />
+              {selectedImage.category}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Attribution */}
       <div className="pb-12 text-center text-[10px] text-muted-foreground/30 italic">
         Made with ❤️ by Raj
